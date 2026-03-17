@@ -107,78 +107,54 @@ def persistir_diff(
     antigos_map = mapear_dispositivos_por_identificador(dispositivos_antigos)
     novos_map = mapear_dispositivos_por_identificador(dispositivos_novos)
 
+    linhas_para_inserir = []
+
     # Mantidos
     for ident in resultado_diff["mantidos"]:
-        cursor.execute(
-            """
-            INSERT INTO diff_estrutural (
-                versao_origem_id,
-                versao_destino_id,
-                identificador,
-                tipo_alteracao,
-                hash_anterior,
-                hash_novo
-            ) VALUES (?, ?, ?, ?, ?, ?)
-            """,
-            (
-                versao_origem_id,
-                versao_destino_id,
-                ident,
-                "mantido",
-                antigos_map[ident]["hash"],
-                novos_map[ident]["hash"],
-            ),
-        )
+        linhas_para_inserir.append((
+            versao_origem_id,
+            versao_destino_id,
+            ident,
+            "mantido",
+            antigos_map[ident]["hash"],
+            novos_map[ident]["hash"],
+        ))
 
     # Alterados
     for ident in resultado_diff["alterados"]:
-        cursor.execute(
-            """
-            INSERT INTO diff_estrutural (
-                versao_origem_id,
-                versao_destino_id,
-                identificador,
-                tipo_alteracao,
-                hash_anterior,
-                hash_novo
-            ) VALUES (?, ?, ?, ?, ?, ?)
-            """,
-            (
-                versao_origem_id,
-                versao_destino_id,
-                ident,
-                "alterado",
-                antigos_map[ident]["hash"],
-                novos_map[ident]["hash"],
-            ),
-        )
+        linhas_para_inserir.append((
+            versao_origem_id,
+            versao_destino_id,
+            ident,
+            "alterado",
+            antigos_map[ident]["hash"],
+            novos_map[ident]["hash"],
+        ))
 
     # Revogados
     for ident in resultado_diff["revogados"]:
-        cursor.execute(
-            """
-            INSERT INTO diff_estrutural (
-                versao_origem_id,
-                versao_destino_id,
-                identificador,
-                tipo_alteracao,
-                hash_anterior,
-                hash_novo
-            ) VALUES (?, ?, ?, ?, ?, ?)
-            """,
-            (
-                versao_origem_id,
-                versao_destino_id,
-                ident,
-                "revogado",
-                antigos_map[ident]["hash"],
-                None,
-            ),
-        )
+        linhas_para_inserir.append((
+            versao_origem_id,
+            versao_destino_id,
+            ident,
+            "revogado",
+            antigos_map[ident]["hash"],
+            None,
+        ))
 
     # Incluídos
     for ident in resultado_diff["incluidos"]:
-        cursor.execute(
+        linhas_para_inserir.append((
+            versao_origem_id,
+            versao_destino_id,
+            ident,
+            "incluido",
+            None,
+            novos_map[ident]["hash"],
+        ))
+
+    if linhas_para_inserir:
+        cursor.executemany(
             """
             INSERT INTO diff_estrutural (
                 versao_origem_id,
@@ -189,14 +165,7 @@ def persistir_diff(
                 hash_novo
             ) VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (
-                versao_origem_id,
-                versao_destino_id,
-                ident,
-                "incluido",
-                None,
-                novos_map[ident]["hash"],
-            ),
+            linhas_para_inserir
         )
 
 
