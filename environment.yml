@@ -1,0 +1,24 @@
+name: leg_ia
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - numpy
+  - pandas
+  - polars
+  - pyarrow
+  - requests
+  - streamlit
+  - pytorch
+  - torchvision
+  - torchaudio
+  - pytorch-cuda=12.1
+  - pip:
+    - sentence-transformers
+    - python-dotenv
+    - PyMuPDF
+    - beautifulsoup4
