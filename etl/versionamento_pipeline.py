@@ -9,8 +9,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import sqlite3
 import hashlib
-from datetime import datetime
-from pathlib import Path
 
 from config import DB_PATH
 import json
