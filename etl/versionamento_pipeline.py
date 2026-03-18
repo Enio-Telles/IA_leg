@@ -107,55 +107,31 @@ def persistir_diff(
     antigos_map = mapear_dispositivos_por_identificador(dispositivos_antigos)
     novos_map = mapear_dispositivos_por_identificador(dispositivos_novos)
 
-    # Mantidos
-    for ident in resultado_diff["mantidos"]:
-        cursor.execute(
-            """
-            INSERT INTO diff_estrutural (
-                versao_origem_id,
-                versao_destino_id,
-                identificador,
-                tipo_alteracao,
-                hash_anterior,
-                hash_novo
-            ) VALUES (?, ?, ?, ?, ?, ?)
-            """,
-            (
-                versao_origem_id,
-                versao_destino_id,
-                ident,
-                "mantido",
-                antigos_map[ident]["hash"],
-                novos_map[ident]["hash"],
-            ),
-        )
+    parametros = []
+    operacoes = [
+        ("mantidos", "mantido", True, True),
+        ("alterados", "alterado", True, True),
+        ("revogados", "revogado", True, False),
+        ("incluidos", "incluido", False, True),
+    ]
 
-    # Alterados
-    for ident in resultado_diff["alterados"]:
-        cursor.execute(
-            """
-            INSERT INTO diff_estrutural (
-                versao_origem_id,
-                versao_destino_id,
-                identificador,
-                tipo_alteracao,
-                hash_anterior,
-                hash_novo
-            ) VALUES (?, ?, ?, ?, ?, ?)
-            """,
-            (
-                versao_origem_id,
-                versao_destino_id,
-                ident,
-                "alterado",
-                antigos_map[ident]["hash"],
-                novos_map[ident]["hash"],
-            ),
-        )
+    for chave_diff, tipo_alteracao, usa_antigo, usa_novo in operacoes:
+        for ident in resultado_diff.get(chave_diff, []):
+            hash_ant = antigos_map[ident]["hash"] if usa_antigo else None
+            hash_novo = novos_map[ident]["hash"] if usa_novo else None
+            parametros.append(
+                (
+                    versao_origem_id,
+                    versao_destino_id,
+                    ident,
+                    tipo_alteracao,
+                    hash_ant,
+                    hash_novo,
+                )
+            )
 
-    # Revogados
-    for ident in resultado_diff["revogados"]:
-        cursor.execute(
+    if parametros:
+        cursor.executemany(
             """
             INSERT INTO diff_estrutural (
                 versao_origem_id,
@@ -166,37 +142,7 @@ def persistir_diff(
                 hash_novo
             ) VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (
-                versao_origem_id,
-                versao_destino_id,
-                ident,
-                "revogado",
-                antigos_map[ident]["hash"],
-                None,
-            ),
-        )
-
-    # Incluídos
-    for ident in resultado_diff["incluidos"]:
-        cursor.execute(
-            """
-            INSERT INTO diff_estrutural (
-                versao_origem_id,
-                versao_destino_id,
-                identificador,
-                tipo_alteracao,
-                hash_anterior,
-                hash_novo
-            ) VALUES (?, ?, ?, ?, ?, ?)
-            """,
-            (
-                versao_origem_id,
-                versao_destino_id,
-                ident,
-                "incluido",
-                None,
-                novos_map[ident]["hash"],
-            ),
+            parametros,
         )
 
 
