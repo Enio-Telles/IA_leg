@@ -4,7 +4,6 @@ Integra com Ollama (local) ou OpenAI-compatible APIs.
 """
 
 import requests
-import json
 import os
 from typing import List, Dict, Optional
 
@@ -118,7 +117,6 @@ def montar_prompt(pergunta: str, contextos: List[Dict]) -> str:
     
     return prompt_usuario
 
-
 # ─────────────────────────────────────────────────────────
 # CHAMADAS AO LLM
 # ─────────────────────────────────────────────────────────
@@ -158,7 +156,6 @@ def chamar_ollama(prompt_usuario: str, modelo: str = None) -> Optional[str]:
         print(f"Erro ao chamar Ollama: {e}")
         return None
 
-
 def chamar_openai(prompt_usuario: str, modelo: str = None) -> Optional[str]:
     """Envia o prompt a uma API OpenAI-compatible e retorna a resposta."""
     if not OPENAI_URL or not OPENAI_KEY:
@@ -194,7 +191,6 @@ def chamar_openai(prompt_usuario: str, modelo: str = None) -> Optional[str]:
     except Exception as e:
         print(f"Erro ao chamar OpenAI: {e}")
         return None
-
 
 def consultar(pergunta: str, top_k: int = 5, backend: str = "ollama") -> str:
     """
@@ -247,7 +243,6 @@ def consultar(pergunta: str, top_k: int = 5, backend: str = "ollama") -> str:
         return "\n".join(linhas)
     
     return resposta
-
 
 # ─────────────────────────────────────────────────────────
 # CLI INTERATIVO
