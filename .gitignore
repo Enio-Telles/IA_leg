@@ -36,7 +36,6 @@ venv.bak/
 # Logs and Temporary Output
 *.log
 *.txt
-*.json
 !README.md
 !ARCHITECTURE.md
 !ANALISE_PROJETO.md
@@ -63,3 +62,4 @@ referencias/*
 # OS Files
 .DS_Store
 Thumbs.db
+frontend/node_modules
