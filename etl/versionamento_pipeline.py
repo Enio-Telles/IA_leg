@@ -293,9 +293,13 @@ def processar_norma_json(caminho_json: str):
                 resultado_diff,
             )
 
-        for identificador, conteudo in dispositivos_novos_list:
-            hash_disp = calcular_hash_texto(conteudo)
-            cursor.execute(
+        # Otimização de Performance: Batch insert para evitar latência N+1 de queries no SQLite
+        dados_insercao_dispositivos = [
+            (nova_versao_id, ident, cont, calcular_hash_texto(cont))
+            for ident, cont in dispositivos_novos_list
+        ]
+        if dados_insercao_dispositivos:
+            cursor.executemany(
                 """
                 INSERT INTO dispositivos (
                     versao_id,
@@ -304,7 +308,7 @@ def processar_norma_json(caminho_json: str):
                     hash_dispositivo
                 ) VALUES (?, ?, ?, ?)
                 """,
-                (nova_versao_id, identificador, conteudo, hash_disp),
+                dados_insercao_dispositivos,
             )
 
         # 7️⃣ Gerar embeddings (Comentado para processamento em massa mais rápido)
