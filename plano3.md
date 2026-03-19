@@ -49,7 +49,7 @@ python -c "import torch; print('CUDA:', torch.cuda.is_available(), '| GPU:', tor
 
 ### 1.2 Mover Modelo de Embedding para GPU
 
-#### [MODIFY] `rag/embeddings.py`
+#### [MODIFY] `-m ia_leg.rag.embedding_service`
 Alterar `carregar_modelo()` para usar GPU automaticamente:
 
 ```python
@@ -106,7 +106,7 @@ LLM_MODEL = "qwen2.5:14b-instruct-q4_K_M"  # Atualizado
 Atualizar o modelo padrão para usar `config.py`:
 
 ```python
-from config import LLM_MODEL
+from ia_leg.core.config.settings import LLM_MODEL
 OLLAMA_MODELO = os.environ.get("OLLAMA_MODELO", LLM_MODEL)
 ```
 
@@ -155,7 +155,7 @@ Adicionar cache do modelo de embedding para eliminar o delay de ~30s na primeira
 ```python
 @st.cache_resource
 def carregar_modelo_rag():
-    from rag.embeddings import carregar_modelo
+    from ia_leg.rag.embedding_service import carregar_modelo
     return carregar_modelo()
 
 # Chamar no início do app (lazy, carrega quando necessário)
@@ -199,8 +199,8 @@ Integrar o reranker no pipeline `consultar()`:
 
 ```python
 def consultar(pergunta, top_k=5, backend="ollama"):
-    from rag.retriever import recuperar_contexto
-    from rag.reranker import rerankar
+    from ia_leg.rag.retriever import recuperar_contexto
+    from ia_leg.rag.reranker import rerankar
     
     contextos = recuperar_contexto(pergunta, top_k=top_k * 2)  # Buscar 2x mais
     contextos = rerankar(pergunta, contextos, top_k=top_k)      # Refinar com reranker
@@ -265,7 +265,7 @@ Gerar documentos formais a partir das respostas do LLM usando `reportlab` ou `we
 - [x] Instalar PyTorch com CUDA 12.4 (`2.5.1+cu124`)
 - [x] Instalar dependências do projeto (mamba + pip)
 - [x] Verificar CUDA disponível (`True` — RTX 3060 12 GB)
-- [x] Alterar `rag/embeddings.py` para usar GPU
+- [x] Alterar `-m ia_leg.rag.embedding_service` para usar GPU
 - [/] Re-indexar toda a base com GPU (~2h30, em progresso: 63.2%)
 
 ### Fase 2 — LLM

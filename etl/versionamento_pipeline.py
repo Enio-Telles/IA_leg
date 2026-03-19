@@ -11,7 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import sqlite3
 import hashlib
 
-from config import DB_PATH
+from ia_leg.core.config.settings import DB_PATH
 import json
 from etl.html_to_text import extrair_texto_html
 from etl.normalizador import extrair_metadados
@@ -310,7 +310,7 @@ def processar_norma_json(caminho_json: str):
             )
 
         # 7️⃣ Gerar embeddings (Comentado para processamento em massa mais rápido)
-        # Recomenda-se rodar rag/embeddings.py separadamente após o ETL total.
+        # Recomenda-se rodar -m ia_leg.rag.embedding_service separadamente após o ETL total.
         """
         cursor.execute(
             "SELECT id, texto FROM dispositivos WHERE versao_id=?",
@@ -405,7 +405,7 @@ def quebrar_dispositivos(texto: str):
 
 
 if __name__ == "__main__":
-    from config import BASE_DIR
+    from ia_leg.core.config.settings import BASE_DIR
 
     text_dir = Path(BASE_DIR) / "documentos" / "texto"
     arquivos = list(text_dir.glob("*.json"))

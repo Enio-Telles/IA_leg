@@ -71,3 +71,18 @@ CREATE INDEX idx_normas_identidade ON normas(tipo, numero, ano);
 CREATE INDEX idx_versoes_vigencia ON versoes_norma(norma_id, vigencia_inicio, vigencia_fim);
 CREATE INDEX idx_dispositivos_identificador ON dispositivos(identificador);
 CREATE INDEX idx_diff_versao_destino ON diff_estrutural (versao_destino_id);
+CREATE TABLE query_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    pergunta TEXT NOT NULL,
+    filtros TEXT,
+    embedding_time_ms REAL,
+    search_time_ms REAL,
+    rerank_time_ms REAL,
+    llm_time_ms REAL,
+    total_time_ms REAL,
+    chunks_used INTEGER,
+    backend TEXT,
+    model TEXT,
+    success BOOLEAN,
+    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+);

@@ -4,7 +4,7 @@ Teste do Prompt Engine com fallback (sem Ollama rodando).
 import sys
 sys.path.insert(0, ".")
 
-from rag.prompt_engine import consultar
+from ia_leg.rag.answer_engine import consultar
 
 print("=" * 60)
 print("TESTE DO PROMPT ENGINE")

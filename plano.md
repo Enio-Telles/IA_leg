@@ -154,7 +154,7 @@ Objetivo: indexar normas e responder consultas fundamentadas.
 
 Entrega esperada:
 
-* rag/embeddings.py
+* -m ia_leg.rag.embedding_service
 * rag/index.py
 * rag/retriever.py
 * rag/prompt_engine.py
@@ -380,7 +380,7 @@ def consultar_norma_por_data(id_norma: str, data: str):
 
 ---
 
-## rag/embeddings.py
+## -m ia_leg.rag.embedding_service
 
 ```python
 """
@@ -882,7 +882,7 @@ from pathlib import Path
 
 from etl.pdf_to_text import extrair_texto_pdf
 from etl.normalizador import extrair_metadados
-from rag.embeddings import gerar_embeddings
+from ia_leg.rag.embedding_service import gerar_embeddings
 
 DB_PATH = "database/metadata.db"
 

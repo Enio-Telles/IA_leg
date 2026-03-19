@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-from config import LEGISLACAO_SEFIN_DIR
+from ia_leg.core.config.settings import LEGISLACAO_SEFIN_DIR
 from etl.html_to_text import extrair_texto_html
 from etl.versionamento_pipeline import (
     conectar,
@@ -241,7 +241,7 @@ def ingerir_html_legislacao():
     print(f"  Pulados (dedup): {pulados}")
     print(f"  Erros:           {erros}")
     print(f"{'=' * 60}")
-    print("\nPróximo passo: python rag/embeddings.py")
+    print("\nPróximo passo: python -m ia_leg.rag.embedding_service")
 
 
 if __name__ == "__main__":

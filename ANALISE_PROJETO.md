@@ -38,7 +38,7 @@ O **IA_leg** é um sistema de Retrieval-Augmented Generation (RAG) desenvolvido 
 |--------|-------------------|-----------|
 | **Crawler** | `crawler/legislacao.py` | Conecta à API SEFIN e baixa JSONs com metadados e HTML de leis |
 | **ETL** | `etl/versionamento_pipeline.py` | Extrai texto de HTML, segmenta em artigos, versiona normas |
-| **RAG - Embeddings** | `rag/embeddings.py` | Gera vetores densos com BGE-M3 e armazena no SQLite |
+| **RAG - Embeddings** | `-m ia_leg.rag.embedding_service` | Gera vetores densos com BGE-M3 e armazena no SQLite |
 | **RAG - Retriever** | `rag/retriever.py` | Busca similaridade vetorial (brute-force com numpy) |
 | **RAG - Prompt Engine** | `rag/prompt_engine.py` | Monta prompts estruturados e chama LLM |
 | **Dashboard** | `dashboard/app.py` | Interface Streamlit com chat, estatísticas e timeline |
@@ -241,7 +241,7 @@ def recuperar_contexto(pergunta, top_k=5):
 # dashboard/app.py — carregar modelo uma vez
 @st.cache_resource
 def carregar_modelo_rag():
-    from rag.embeddings import carregar_modelo
+    from ia_leg.rag.embedding_service import carregar_modelo
     return carregar_modelo()
 ```
 

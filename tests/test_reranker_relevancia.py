@@ -14,8 +14,8 @@ import copy
 
 sys.path.insert(0, ".")
 
-from rag.retriever import recuperar_contexto
-from rag.reranker import rerankar
+from ia_leg.rag.retriever import recuperar_contexto
+from ia_leg.rag.reranker import rerankar
 
 # ---------------------------------------------------------
 # QUERIES DE TESTE
@@ -54,7 +54,7 @@ def testar_query(pergunta, f):
 
     # Retriever puro (cosine similarity)
     t0 = time.perf_counter()
-    candidatos = recuperar_contexto(pergunta, top_k=TOP_K_RETRIEVER)
+    candidatos, _ = recuperar_contexto(pergunta, top_k=TOP_K_RETRIEVER)
     t_retriever = time.perf_counter() - t0
 
     if not candidatos:
