@@ -17,7 +17,6 @@ from config import DB_PATH
 import json
 from etl.html_to_text import extrair_texto_html
 from etl.normalizador import extrair_metadados
-from rag.embeddings import gerar_embeddings
 
 # -------------------------------------------------
 # UTILITÁRIOS
