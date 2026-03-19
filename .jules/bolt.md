@@ -1,0 +1,3 @@
+## 2024-03-24 - [Batch Database Inserts for Versioning Pipeline]
+**Learning:** The document ingestion pipeline (`etl/versionamento_pipeline.py`) performs sequential single-row `INSERT` operations into the `dispositivos` SQLite table within a loop. This creates severe N+1 query latency, especially detrimental when parsing long legal documents with hundreds of articles.
+**Action:** Replaced sequential `cursor.execute()` with batched list comprehensions and `cursor.executemany()`. For future ETL optimizations in SQLite pipelines, always prioritize batched database transactions over single-row iterative updates.
