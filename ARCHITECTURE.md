@@ -15,7 +15,7 @@ O IA_leg é baseado em uma arquitetura de **Retrieval-Augmented Generation (RAG)
 *   **Estratégia de Chunking**: O sistema não corta o texto por tamanho fixo, mas sim por **unidade lógica (Artigos)**. Isso garante que o contexto jurídico não seja quebrado ao meio.
 *   **Metadados**: Cada "chunk" é vinculado ao seu ID de dispositivo, versão da norma e status de vigência.
 
-### 1.3 Embeddings (`rag/embeddings.py`)
+### 1.3 Embeddings (`-m ia_leg.rag.embedding_service`)
 *   **Modelo**: `BAAI/bge-m3` (famoso por sua performance em português e suporte a múltiplos idiomas).
 *   **Otimização**: Os embeddings são gerados na GPU (CUDA) e salvos como blobs binários no banco de dados.
 *   **Processamento**: Atualmente lida com ~13k dispositivos legais.

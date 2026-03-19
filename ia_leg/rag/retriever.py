@@ -1,34 +1,62 @@
 """
 Recupera trechos normativos com filtro temporal.
-Otimizado com cache em memória para performance.
+Otimizado com cache em memória baseado em versão do índice e queries repetidas.
 """
-
 
 import sqlite3
 import numpy as np
-from typing import List, Dict
+import hashlib
+import time
+from typing import List, Dict, Tuple
 
-from config import DB_PATH
-from rag.embeddings import carregar_modelo
+from ia_leg.core.config.settings import DB_PATH
+from ia_leg.rag.embedding_service import carregar_modelo
 
 # ─────────────────────────────────────────────────────────
 # CACHE DE VETORES EM MEMÓRIA
 # ─────────────────────────────────────────────────────────
 
-_VETORES_CACHE = None
 _METADADOS_CACHE = None
 _MATRIX_CACHE = None
+_INDEX_VERSION = None
+
+# Cache de queries repetidas
+_QUERY_CACHE = {}
+
+
+def obter_versao_indice() -> str:
+    """Obtém a versão atual do índice vetorial baseada na data da última indexação."""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT MAX(criado_em) FROM embeddings")
+        ultima_data = cursor.fetchone()[0]
+        conn.close()
+        return ultima_data or "v0"
+    except Exception:
+        return "v0"
+
+
+def invalidar_cache():
+    """Força recarga dos vetores e limpa queries (chamar após re-indexação)."""
+    global _METADADOS_CACHE, _MATRIX_CACHE, _INDEX_VERSION, _QUERY_CACHE
+    _METADADOS_CACHE = None
+    _MATRIX_CACHE = None
+    _INDEX_VERSION = None
+    _QUERY_CACHE.clear()
+    print("Cache de vetores invalidado.")
 
 
 def _carregar_vetores():
-    """Carrega todos os vetores e metadados do banco uma única vez.
-    Armazena em memória para buscas subsequentes instantâneas."""
-    global _VETORES_CACHE, _METADADOS_CACHE, _MATRIX_CACHE
+    """Carrega todos os vetores e metadados do banco, gerenciando a versão do cache."""
+    global _METADADOS_CACHE, _MATRIX_CACHE, _INDEX_VERSION, _QUERY_CACHE
 
-    if _MATRIX_CACHE is not None:
+    versao_atual = obter_versao_indice()
+
+    if _MATRIX_CACHE is not None and _INDEX_VERSION == versao_atual:
         return _METADADOS_CACHE, _MATRIX_CACHE
 
-    print("Carregando vetores na memória (primeira vez)...")
+    print(f"Carregando vetores na memória (versão: {versao_atual})...")
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute('''
@@ -46,6 +74,7 @@ def _carregar_vetores():
     if not resultados:
         _METADADOS_CACHE = []
         _MATRIX_CACHE = np.array([])
+        _INDEX_VERSION = versao_atual
         return _METADADOS_CACHE, _MATRIX_CACHE
 
     # Separar metadados e vetores para operação vetorizada
@@ -64,62 +93,66 @@ def _carregar_vetores():
         vetores.append(np.frombuffer(vetor_bytes, dtype=np.float32))
 
     _METADADOS_CACHE = metadados
-    _MATRIX_CACHE = np.vstack(vetores)  # Matriz (N, dim) para dot-product vetorizado
+    _MATRIX_CACHE = np.vstack(vetores)
+    _INDEX_VERSION = versao_atual
+
+    # Limpar cache de queries pois o índice base mudou
+    _QUERY_CACHE.clear()
+
     print(f"  {len(metadados)} vetores carregados ({_MATRIX_CACHE.shape})")
     return _METADADOS_CACHE, _MATRIX_CACHE
 
 
-def invalidar_cache():
-    """Força recarga dos vetores (chamar após re-indexação)."""
-    global _VETORES_CACHE, _METADADOS_CACHE, _MATRIX_CACHE
-    _VETORES_CACHE = None
-    _METADADOS_CACHE = None
-    _MATRIX_CACHE = None
-    print("Cache de vetores invalidado.")
+def _gerar_hash_query(pergunta: str, filtros: List[str] = None) -> str:
+    """Gera um hash único para a query + filtros."""
+    chave = pergunta + (str(sorted(filtros)) if filtros else "")
+    return hashlib.sha256(chave.encode('utf-8')).hexdigest()
 
 
-def recuperar_contexto(pergunta: str, top_k: int = 5, filtro_tipos: List[str] = None) -> List[Dict]:
+def recuperar_contexto(pergunta: str, top_k: int = 5, filtro_tipos: List[str] = None) -> Tuple[List[Dict], float]:
     """
-    Retorna documentos mais relevantes baseados na pergunta.
-    Usa cache em memória e operações vetorizadas com numpy.
-    Opcionalmente filtra por uma lista de `filtro_tipos` (ex: ["Guia_Pratico_EFD", "Parecer"]).
+    Retorna documentos relevantes baseados na pergunta.
+    Retorna a lista de contextos e o tempo de busca_ms.
     """
+    inicio = time.time()
+
+    # Verificar cache de queries
+    hash_query = _gerar_hash_query(pergunta, filtro_tipos)
+    if hash_query in _QUERY_CACHE:
+        return _QUERY_CACHE[hash_query], (time.time() - inicio) * 1000
+
     metadados, matrix = _carregar_vetores()
 
     if len(metadados) == 0:
-        return []
+        return [], 0.0
 
     # Gerar vetor da query
     modelo = carregar_modelo()
     vetor_query = modelo.encode([pergunta], normalize_embeddings=True)[0]
 
-    # Busca vetorizada: dot-product de uma vez com toda a matriz
-    scores = matrix @ vetor_query  # (N,) = (N, dim) @ (dim,)
+    # Busca vetorizada: dot-product
+    scores = matrix @ vetor_query  # (N,)
     
-    # Se houver filtro de tipos, zeramos os scores de quem não passar no filtro
+    # Filtro
     if filtro_tipos:
         filtro_tipos = [t.lower() for t in filtro_tipos]
         mask = np.array([m["tipo"].lower() in filtro_tipos for m in metadados])
         scores = np.where(mask, scores, -9999.0)
 
-    # Top-K mais eficiente com argpartition
+    # Top-K
     k = min(top_k, len(scores))
     top_indices = np.argpartition(scores, -k)[-k:]
     top_indices = top_indices[np.argsort(scores[top_indices])[::-1]]
 
     resultados = []
     for idx in top_indices:
-        if scores[idx] > -9998.0: # Ignorar os que foram zerados pelo filtro
+        if scores[idx] > -9998.0:
             resultado = metadados[idx].copy()
             resultado["score"] = float(scores[idx])
             resultados.append(resultado)
 
-    return resultados
+    _QUERY_CACHE[hash_query] = resultados
+    tempo_ms = (time.time() - inicio) * 1000
 
-
-if __name__ == "__main__":
-    resp = recuperar_contexto("Aliquota de combustivel aviação")
-    for r in resp:
-        print(f"Score: {r['score']:.4f} | {r['norma']} - {r['identificador']}")
-        print(f"{r['texto'][:100]}...\n")
+    return resultados, tempo_ms
 

@@ -6,7 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding='utf-8')
 
-from config import BASE_DIR
+from ia_leg.core.config.settings import BASE_DIR
 from etl.pdf_to_text import extrair_texto_pdf
 from etl.versionamento_pipeline import conectar, calcular_hash_texto, quebrar_pdf_em_chunks
 
@@ -176,7 +176,7 @@ def ingerir_pdfs():
     
     print("\n---------------------------------------------------------")
     print("Ingestão de texto concluída. Você deve rodar o script:")
-    print("python rag/embeddings.py")
+    print("python -m ia_leg.rag.embedding_service")
     print("para vetorizar esses novos dispositivos e torná-los pesquisáveis pela IA.")
     print("---------------------------------------------------------")
 

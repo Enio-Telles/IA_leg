@@ -75,7 +75,7 @@ ollama pull qwen2.5:14b-instruct-q4_K_M
 ### A. Indexação (Apenas se houver novos dados)
 Para processar a legislação e criar a base vetorial:
 ```bash
-python rag/embeddings.py
+python -m ia_leg.rag.embedding_service
 ```
 *Tempo estimado: ~5-10 minutos com GPU ativa.*
 

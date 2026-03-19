@@ -14,7 +14,7 @@ import sqlite3
 import pandas as pd
 from datetime import datetime
 
-from config import DB_PATH
+from ia_leg.core.config.settings import DB_PATH
 
 # ─────────────────────────────────────────────────────────
 # CONFIGURAÇÃO DA PÁGINA
@@ -121,7 +121,7 @@ def get_db_connection():
 @st.cache_resource
 def carregar_modelo_rag():
     """Pré-carrega o modelo de embedding para eliminar latência na primeira consulta."""
-    from rag.embeddings import carregar_modelo
+    from ia_leg.rag.embedding_service import carregar_modelo
     return carregar_modelo()
 
 @st.cache_data(ttl=60)
@@ -298,7 +298,7 @@ with st.sidebar:
     
     if st.button("🔄 Atualizar Base (RAG)", help="Recarrega os vetores e metadados mais recentes do banco."):
         with st.spinner("Limpando cache e recarregando vetores..."):
-            from rag.retriever import invalidar_cache
+            from ia_leg.rag.retriever import invalidar_cache
             invalidar_cache()
             st.cache_data.clear()
             st.cache_resource.clear()
@@ -334,7 +334,7 @@ if pagina == "💬 Consulta IA":
         with st.chat_message("assistant", avatar="⚖️"):
             with st.spinner("Buscando na legislação e consultando IA..."):
                 try:
-                    from rag.prompt_engine import consultar
+                    from ia_leg.rag.answer_engine import consultar
                     resposta = consultar(prompt, top_k=5, backend="ollama")
                 except Exception as e:
                     resposta = f"❌ Erro ao consultar: {e}"

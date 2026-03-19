@@ -1,24 +1,22 @@
 """
 Constrói prompts estruturados para respostas fundamentadas.
-Integra com Ollama (local) ou OpenAI-compatible APIs.
+Mede métricas de pipeline e integra com Ollama ou APIs OpenAI-compatible.
 """
 
 import requests
 import json
 import os
-from typing import List, Dict, Optional
+import time
+import sqlite3
+from typing import List, Dict, Optional, Tuple
+
+from ia_leg.core.config.settings import LLM_MODEL, DB_PATH
 
 # ─────────────────────────────────────────────────────────
 # CONFIGURAÇÃO
 # ─────────────────────────────────────────────────────────
 
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
-
-try:
-    from config import LLM_MODEL
-except ImportError:
-    LLM_MODEL = "llama3"
-
 OLLAMA_MODELO = os.environ.get("OLLAMA_MODELO", LLM_MODEL)
 
 OPENAI_URL = os.environ.get("OPENAI_URL", "")  # Ex: https://api.openai.com/v1
@@ -51,9 +49,7 @@ def definir_filtros_por_pergunta(pergunta: str) -> Optional[List[str]]:
     
     # Palavras-chave de Obrigação Acessória/Prática
     keywords_escrituracao = ["escriturar", "efd", "sped", "registro", "bloco", "fecoep", "ajuste", "guia", "manual"]
-    
     if any(kw in pergunta_min for kw in keywords_escrituracao):
-        # Foca nos tipos que ditam o *como fazer*
         return ["Guia_Pratico_EFD", "Manual_MOC", "Parecer", "Despacho"]
     
     # Palavras-chave de súmulas/enunciados
@@ -91,12 +87,10 @@ def definir_filtros_por_pergunta(pergunta: str) -> Optional[List[str]]:
     if any(kw in pergunta_min for kw in keywords_fisconf):
         return ["Orientacao_Fisconforme", "Orientacao", "Despacho"]
         
-    return None  # Sem filtros, busca em tudo
+    return None
 
 def montar_prompt(pergunta: str, contextos: List[Dict]) -> str:
-    """
-    Monta o prompt completo com a pergunta e os trechos legislativos relevantes.
-    """
+    """Monta o prompt completo com a pergunta e os trechos legislativos relevantes."""
     blocos = []
     for i, ctx in enumerate(contextos, 1):
         bloco = (
@@ -108,25 +102,22 @@ def montar_prompt(pergunta: str, contextos: List[Dict]) -> str:
     
     contexto_formatado = "\n\n".join(blocos) if blocos else "(Nenhum trecho normativo/manual encontrado na base.)"
     
-    prompt_usuario = f"""## Contexto Recuperado (Manuais, Pareceres e Leis):
+    return f"""## Contexto Recuperado (Manuais, Pareceres e Leis):
 {contexto_formatado}
 
 ## Pergunta do Usuário:
 {pergunta}
 
 ## Sua Resposta Especializada:"""
-    
-    return prompt_usuario
 
 
 # ─────────────────────────────────────────────────────────
 # CHAMADAS AO LLM
 # ─────────────────────────────────────────────────────────
 
-def chamar_ollama(prompt_usuario: str, modelo: str = None) -> Optional[str]:
-    """Envia o prompt ao Ollama local e retorna a resposta."""
+def chamar_ollama(prompt_usuario: str, modelo: str = None) -> Tuple[Optional[str], float]:
     modelo = modelo or OLLAMA_MODELO
-    
+    inicio = time.time()
     try:
         resp = requests.post(
             f"{OLLAMA_URL}/api/chat",
@@ -137,43 +128,31 @@ def chamar_ollama(prompt_usuario: str, modelo: str = None) -> Optional[str]:
                     {"role": "user", "content": prompt_usuario}
                 ],
                 "stream": False,
-                "options": {
-                    "temperature": 0.1,  # Baixa para respostas mais factuais
-                    "num_predict": 2048
-                }
+                "options": {"temperature": 0.1, "num_predict": 2048}
             },
             timeout=300
         )
-        
+        tempo = (time.time() - inicio) * 1000
         if resp.status_code == 200:
-            return resp.json().get("message", {}).get("content", "")
-        else:
-            print(f"Erro Ollama ({resp.status_code}): {resp.text[:200]}")
-            return None
-            
-    except requests.exceptions.ConnectionError:
-        print("Ollama não está rodando. Inicie com: ollama serve")
-        return None
+            return resp.json().get("message", {}).get("content", ""), tempo
+        print(f"Erro Ollama ({resp.status_code}): {resp.text[:200]}")
+        return None, tempo
     except Exception as e:
         print(f"Erro ao chamar Ollama: {e}")
-        return None
+        return None, (time.time() - inicio) * 1000
 
 
-def chamar_openai(prompt_usuario: str, modelo: str = None) -> Optional[str]:
-    """Envia o prompt a uma API OpenAI-compatible e retorna a resposta."""
+def chamar_openai(prompt_usuario: str, modelo: str = None) -> Tuple[Optional[str], float]:
     if not OPENAI_URL or not OPENAI_KEY:
         print("Configure OPENAI_URL e OPENAI_API_KEY nas variáveis de ambiente.")
-        return None
+        return None, 0.0
     
     modelo = modelo or OPENAI_MODELO
-    
+    inicio = time.time()
     try:
         resp = requests.post(
             f"{OPENAI_URL}/chat/completions",
-            headers={
-                "Authorization": f"Bearer {OPENAI_KEY}",
-                "Content-Type": "application/json"
-            },
+            headers={"Authorization": f"Bearer {OPENAI_KEY}", "Content-Type": "application/json"},
             json={
                 "model": modelo,
                 "messages": [
@@ -185,103 +164,91 @@ def chamar_openai(prompt_usuario: str, modelo: str = None) -> Optional[str]:
             },
             timeout=60
         )
-        
+        tempo = (time.time() - inicio) * 1000
         if resp.status_code == 200:
-            return resp.json()["choices"][0]["message"]["content"]
-        else:
-            print(f"Erro OpenAI ({resp.status_code}): {resp.text[:200]}")
-            return None
+            return resp.json()["choices"][0]["message"]["content"], tempo
+        print(f"Erro OpenAI ({resp.status_code}): {resp.text[:200]}")
+        return None, tempo
     except Exception as e:
         print(f"Erro ao chamar OpenAI: {e}")
-        return None
+        return None, (time.time() - inicio) * 1000
 
+def registrar_metricas(pergunta: str, filtros: List[str], metadados: Dict):
+    try:
+        conn = sqlite3.connect(str(DB_PATH))
+        cursor = conn.cursor()
+        cursor.execute(
+            """INSERT INTO query_logs
+               (pergunta, filtros, embedding_time_ms, search_time_ms, rerank_time_ms, llm_time_ms, total_time_ms, chunks_used, backend, model, success)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                pergunta,
+                str(filtros) if filtros else None,
+                metadados.get("embedding_time_ms"),
+                metadados.get("search_time_ms"),
+                metadados.get("rerank_time_ms"),
+                metadados.get("llm_time_ms"),
+                metadados.get("total_time_ms"),
+                metadados.get("chunks_used"),
+                metadados.get("backend"),
+                metadados.get("model"),
+                metadados.get("success")
+            )
+        )
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Aviso: Erro ao registrar métricas - {e}")
 
 def consultar(pergunta: str, top_k: int = 5, backend: str = "ollama") -> str:
-    """
-    Pipeline completo: Recupera contexto → Monta prompt → Chama LLM.
-    """
-    from rag.retriever import recuperar_contexto
+    from ia_leg.rag.retriever import recuperar_contexto
+
+    inicio_total = time.time()
+    metricas = {"backend": backend, "model": OLLAMA_MODELO if backend == "ollama" else OPENAI_MODELO, "success": False}
     
     print(f"🔍 Buscando legislação relevante para: \"{pergunta}\"")
     
-    # Roteamento automático
     filtros = definir_filtros_por_pergunta(pergunta)
     if filtros:
-        print(f"🚦 Roteamento de Query: Aplicando filtros de metadados: {filtros}")
+        print(f"🚦 Roteamento de Query: Aplicando filtros: {filtros}")
         
-    contextos = recuperar_contexto(pergunta, top_k=top_k * 2, filtro_tipos=filtros)
+    contextos, metricas["search_time_ms"] = recuperar_contexto(pergunta, top_k=top_k * 2, filtro_tipos=filtros)
     
     if not contextos:
+        metricas["total_time_ms"] = (time.time() - inicio_total) * 1000
+        registrar_metricas(pergunta, filtros, metricas)
         return "Não foram encontrados dispositivos ou trechos de manuais na base vetorial que correspondam à sua busca."
     
-    # Reranking com cross-encoder para melhorar precisão
     try:
-        from rag.reranker import rerankar
-        print(f"🔄 Reranking {len(contextos)} candidatos...")
+        # TODO: Refatorar reranker futuramente, por enquanto isolamos o timing
+        inicio_rerank = time.time()
+        from ia_leg.rag.reranker import rerankar # Temporary, to be fixed in next phase if not refactored yet
         contextos = rerankar(pergunta, contextos, top_k=top_k)
+        metricas["rerank_time_ms"] = (time.time() - inicio_rerank) * 1000
     except Exception as e:
         print(f"⚠️ Reranker indisponível ({e}), usando scores originais.")
         contextos = contextos[:top_k]
+        metricas["rerank_time_ms"] = 0.0
     
-    print(f"📋 {len(contextos)} trechos selecionados (melhor score: {contextos[0].get('score_rerank', contextos[0]['score']):.4f})")
-    
+    metricas["chunks_used"] = len(contextos)
     prompt = montar_prompt(pergunta, contextos)
     
     print(f"🤖 Consultando LLM ({backend})...")
     
     if backend == "ollama":
-        resposta = chamar_ollama(prompt)
+        resposta, metricas["llm_time_ms"] = chamar_ollama(prompt)
     elif backend == "openai":
-        resposta = chamar_openai(prompt)
+        resposta, metricas["llm_time_ms"] = chamar_openai(prompt)
     else:
-        resposta = None
-        print(f"Backend '{backend}' não suportado. Use 'ollama' ou 'openai'.")
+        resposta, metricas["llm_time_ms"] = None, 0.0
+
+    metricas["total_time_ms"] = (time.time() - inicio_total) * 1000
     
     if resposta is None:
-        # Fallback: retorna o contexto raw se o LLM não estiver disponível
-        print("⚠️ LLM indisponível. Retornando contexto interpretado bruto.\n")
-        linhas = [f"**Contexto recuperado para:** {pergunta}\n"]
-        for ctx in contextos:
-            linhas.append(f"---\n**{ctx['norma']}** — {ctx['identificador']} (score: {ctx['score']:.4f})")
-            linhas.append(f"{ctx['texto'][:500]}...\n")
-        return "\n".join(linhas)
+        metricas["success"] = False
+        registrar_metricas(pergunta, filtros, metricas)
+        return "Erro ao consultar LLM. Use fallbacks de contexto."
     
+    metricas["success"] = True
+    registrar_metricas(pergunta, filtros, metricas)
     return resposta
-
-
-# ─────────────────────────────────────────────────────────
-# CLI INTERATIVO
-# ─────────────────────────────────────────────────────────
-
-if __name__ == "__main__":
-    import sys
-    
-    print("=" * 60)
-    print("REVISOR FISCAL INTELIGENTE — SEFIN/RO")
-    print("Sistema de Consulta à Legislação Tributária")
-    print("=" * 60)
-    print("Digite sua pergunta ou 'sair' para encerrar.\n")
-    
-    backend = "ollama"
-    
-    while True:
-        try:
-            pergunta = input("📝 Pergunta: ").strip()
-        except (EOFError, KeyboardInterrupt):
-            print("\nEncerrando.")
-            break
-            
-        if not pergunta or pergunta.lower() in ("sair", "exit", "quit"):
-            print("Encerrando.")
-            break
-        
-        if pergunta.startswith("/backend "):
-            backend = pergunta.split(" ", 1)[1].strip()
-            print(f"Backend alterado para: {backend}")
-            continue
-            
-        resposta = consultar(pergunta, top_k=5, backend=backend)
-        print(f"\n{'─'*60}")
-        print(resposta)
-        print(f"{'─'*60}\n")
-
