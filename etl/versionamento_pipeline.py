@@ -10,8 +10,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import sqlite3
 import hashlib
-from datetime import datetime
-from pathlib import Path
 
 from config import DB_PATH
 import json
@@ -293,9 +291,13 @@ def processar_norma_json(caminho_json: str):
                 resultado_diff,
             )
 
-        for identificador, conteudo in dispositivos_novos_list:
-            hash_disp = calcular_hash_texto(conteudo)
-            cursor.execute(
+        # Melhorador: Batch insert to prevent N+1 query latency
+        dados_dispositivos = [
+            (nova_versao_id, identificador, conteudo, calcular_hash_texto(conteudo))
+            for identificador, conteudo in dispositivos_novos_list
+        ]
+        if dados_dispositivos:
+            cursor.executemany(
                 """
                 INSERT INTO dispositivos (
                     versao_id,
@@ -304,7 +306,7 @@ def processar_norma_json(caminho_json: str):
                     hash_dispositivo
                 ) VALUES (?, ?, ?, ?)
                 """,
-                (nova_versao_id, identificador, conteudo, hash_disp),
+                dados_dispositivos,
             )
 
         # 7️⃣ Gerar embeddings (Comentado para processamento em massa mais rápido)
@@ -404,7 +406,6 @@ def quebrar_dispositivos(texto: str):
 
 if __name__ == "__main__":
     from config import BASE_DIR
-    import glob
 
     text_dir = Path(BASE_DIR) / "documentos" / "texto"
     arquivos = list(text_dir.glob("*.json"))
@@ -412,7 +413,7 @@ if __name__ == "__main__":
     print(f"Iniciando processamento ETL de {len(arquivos)} arquivos JSON.")
     for arq in arquivos:
         try:
-            print(f"----------------------------------------")
+            print("----------------------------------------")
             print(f"Processando {arq.name}...")
             processar_norma_json(str(arq))
         except Exception as e:
