@@ -5,6 +5,7 @@ Responsável por manter integridade histórica e consistência temporal.
 
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import sqlite3
@@ -31,6 +32,7 @@ def conectar():
     conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA foreign_keys = ON;")
     return conn
+
 
 # -------------------------------------------------
 # COMPARADOR ESTRUTURAL
@@ -107,19 +109,10 @@ def persistir_diff(
     antigos_map = mapear_dispositivos_por_identificador(dispositivos_antigos)
     novos_map = mapear_dispositivos_por_identificador(dispositivos_novos)
 
-    # Mantidos
-    for ident in resultado_diff["mantidos"]:
-        cursor.execute(
-            """
-            INSERT INTO diff_estrutural (
-                versao_origem_id,
-                versao_destino_id,
-                identificador,
-                tipo_alteracao,
-                hash_anterior,
-                hash_novo
-            ) VALUES (?, ?, ?, ?, ?, ?)
-            """,
+    dados_insercao = []
+
+    for ident in resultado_diff.get("mantidos", []):
+        dados_insercao.append(
             (
                 versao_origem_id,
                 versao_destino_id,
@@ -127,22 +120,11 @@ def persistir_diff(
                 "mantido",
                 antigos_map[ident]["hash"],
                 novos_map[ident]["hash"],
-            ),
+            )
         )
 
-    # Alterados
-    for ident in resultado_diff["alterados"]:
-        cursor.execute(
-            """
-            INSERT INTO diff_estrutural (
-                versao_origem_id,
-                versao_destino_id,
-                identificador,
-                tipo_alteracao,
-                hash_anterior,
-                hash_novo
-            ) VALUES (?, ?, ?, ?, ?, ?)
-            """,
+    for ident in resultado_diff.get("alterados", []):
+        dados_insercao.append(
             (
                 versao_origem_id,
                 versao_destino_id,
@@ -150,22 +132,11 @@ def persistir_diff(
                 "alterado",
                 antigos_map[ident]["hash"],
                 novos_map[ident]["hash"],
-            ),
+            )
         )
 
-    # Revogados
-    for ident in resultado_diff["revogados"]:
-        cursor.execute(
-            """
-            INSERT INTO diff_estrutural (
-                versao_origem_id,
-                versao_destino_id,
-                identificador,
-                tipo_alteracao,
-                hash_anterior,
-                hash_novo
-            ) VALUES (?, ?, ?, ?, ?, ?)
-            """,
+    for ident in resultado_diff.get("revogados", []):
+        dados_insercao.append(
             (
                 versao_origem_id,
                 versao_destino_id,
@@ -173,12 +144,23 @@ def persistir_diff(
                 "revogado",
                 antigos_map[ident]["hash"],
                 None,
-            ),
+            )
         )
 
-    # Incluídos
-    for ident in resultado_diff["incluidos"]:
-        cursor.execute(
+    for ident in resultado_diff.get("incluidos", []):
+        dados_insercao.append(
+            (
+                versao_origem_id,
+                versao_destino_id,
+                ident,
+                "incluido",
+                None,
+                novos_map[ident]["hash"],
+            )
+        )
+
+    if dados_insercao:
+        cursor.executemany(
             """
             INSERT INTO diff_estrutural (
                 versao_origem_id,
@@ -189,14 +171,7 @@ def persistir_diff(
                 hash_novo
             ) VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (
-                versao_origem_id,
-                versao_destino_id,
-                ident,
-                "incluido",
-                None,
-                novos_map[ident]["hash"],
-            ),
+            dados_insercao,
         )
 
 
@@ -224,7 +199,7 @@ def processar_norma_json(caminho_json: str):
         # 1️⃣ Ler JSON e extrair texto e metadados
         with open(caminho_json, "r", encoding="utf-8") as f:
             dados = json.load(f)
-            
+
         texto = extrair_texto_html(dados.get("texto_html", ""))
         metadados = extrair_metadados(dados)
 
@@ -272,7 +247,7 @@ def processar_norma_json(caminho_json: str):
             # Buscar dispositivos da versão anterior para comparação estrutural
             cursor.execute(
                 "SELECT identificador, texto FROM dispositivos WHERE versao_id=?",
-                (versao_atual[0],)
+                (versao_atual[0],),
             )
             dispositivos_antigos = cursor.fetchall()
 
@@ -307,15 +282,17 @@ def processar_norma_json(caminho_json: str):
 
         # Comparação estrutural:
         if versao_atual:
-             resultado_diff = comparar_estruturalmente(dispositivos_antigos, dispositivos_novos_list)
-             persistir_diff(
-                 cursor,
-                 versao_atual[0],
-                 nova_versao_id,
-                 dispositivos_antigos,
-                 dispositivos_novos_list,
-                 resultado_diff
-             )
+            resultado_diff = comparar_estruturalmente(
+                dispositivos_antigos, dispositivos_novos_list
+            )
+            persistir_diff(
+                cursor,
+                versao_atual[0],
+                nova_versao_id,
+                dispositivos_antigos,
+                dispositivos_novos_list,
+                resultado_diff,
+            )
 
         for identificador, conteudo in dispositivos_novos_list:
             hash_disp = calcular_hash_texto(conteudo)
@@ -371,7 +348,9 @@ def processar_norma_json(caminho_json: str):
 # -------------------------------------------------
 
 
-def quebrar_pdf_em_chunks(texto: str, tamanho_maximo: int = 1500, sobreposicao: int = 200):
+def quebrar_pdf_em_chunks(
+    texto: str, tamanho_maximo: int = 1500, sobreposicao: int = 200
+):
     """
     Divide textos genéricos (Manuais, Pareceres) em chunks menores para vetorização.
     Tenta quebrar em parágrafos e agrupa até o tamanho máximo (+sobreposição).
@@ -380,12 +359,12 @@ def quebrar_pdf_em_chunks(texto: str, tamanho_maximo: int = 1500, sobreposicao: 
     chunks = []
     chunk_atual = ""
     contador = 1
-    
+
     for p in paragrafos:
         p = p.strip()
         if not p:
             continue
-            
+
         if len(chunk_atual) + len(p) < tamanho_maximo:
             chunk_atual += p + "\n\n"
         else:
@@ -393,18 +372,19 @@ def quebrar_pdf_em_chunks(texto: str, tamanho_maximo: int = 1500, sobreposicao: 
             if chunk_atual:
                 chunks.append((f"Trecho {contador}", chunk_atual.strip()))
                 contador += 1
-                
+
             # Sobreposição puxa as palavras finais do chunk anterior
             palavras = chunk_atual.split()
             pedaco_sobreposicao = " ".join(palavras[-sobreposicao:]) if palavras else ""
-            
+
             chunk_atual = pedaco_sobreposicao + "\n\n" + p + "\n\n"
-            
+
     # Salvar o último
     if chunk_atual.strip():
         chunks.append((f"Trecho {contador}", chunk_atual.strip()))
-        
+
     return chunks
+
 
 def quebrar_dispositivos(texto: str):
     """
@@ -422,13 +402,14 @@ def quebrar_dispositivos(texto: str):
 
     return dispositivos
 
+
 if __name__ == "__main__":
     from config import BASE_DIR
     import glob
-    
+
     text_dir = Path(BASE_DIR) / "documentos" / "texto"
     arquivos = list(text_dir.glob("*.json"))
-    
+
     print(f"Iniciando processamento ETL de {len(arquivos)} arquivos JSON.")
     for arq in arquivos:
         try:
@@ -437,5 +418,6 @@ if __name__ == "__main__":
             processar_norma_json(str(arq))
         except Exception as e:
             import traceback
+
             print(f"Falha ao processar {arq.name}: {e}")
             traceback.print_exc()
