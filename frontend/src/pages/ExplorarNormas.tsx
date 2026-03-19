@@ -44,7 +44,11 @@ const ExplorarNormas = () => {
           placeholder="Pesquisar por tipo, número ou ano"
           className="w-full pl-14 pr-6 py-5 bg-white border-2 border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-lg shadow-sm font-medium text-slate-800 placeholder-slate-400"
         />
-        <button className="absolute right-4 top-1/2 -translate-y-1/2 px-6 py-2.5 bg-[#0f3460] hover:bg-[#16213e] text-white rounded-xl transition-colors font-semibold shadow-md">
+        <button
+          aria-label="Pesquisar normas"
+          disabled={!searchTerm.trim()}
+          className="absolute right-4 top-1/2 -translate-y-1/2 px-6 py-2.5 bg-[#0f3460] hover:bg-[#16213e] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl transition-colors font-semibold shadow-md"
+        >
           Pesquisar
         </button>
       </div>
@@ -61,6 +65,9 @@ const ExplorarNormas = () => {
             <div key={result.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-300">
               {/* Accordion Header */}
               <button
+                aria-expanded={expanded === result.id}
+                aria-controls={`content-${result.id}`}
+                id={`accordion-${result.id}`}
                 onClick={() => toggleExpand(result.id)}
                 className="w-full px-6 py-5 flex items-center justify-between hover:bg-slate-50 transition-colors focus:outline-none focus:bg-slate-50"
               >
@@ -76,13 +83,13 @@ const ExplorarNormas = () => {
                   </div>
                 </div>
                 <div className={`p-2 rounded-full transition-colors ${expanded === result.id ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-400'}`}>
-                  {expanded === result.id ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                  {expanded === result.id ? <ChevronUp className="w-5 h-5" aria-hidden="true" /> : <ChevronDown className="w-5 h-5" aria-hidden="true" />}
                 </div>
               </button>
 
               {/* Accordion Content */}
               {expanded === result.id && (
-                <div className="border-t border-slate-100 bg-slate-50/50 p-6">
+                <div id={`content-${result.id}`} aria-labelledby={`accordion-${result.id}`} className="border-t border-slate-100 bg-slate-50/50 p-6">
                   <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
                     <Clock className="w-5 h-5 text-slate-400" /> Histórico de Versões
                   </h4>
