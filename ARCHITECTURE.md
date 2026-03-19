@@ -37,9 +37,9 @@ O IA_leg é baseado em uma arquitetura de **Retrieval-Augmented Generation (RAG)
 
 ---
 
-## 2. Interface e Dashboard (`dashboard/`)
+## 2. Interface (`frontend/`)
 
-*   **Tecnologia**: Streamlit.
+*   **Tecnologia**: React SPA, Vite, TypeScript, Tailwind CSS, e React Router.
 *   **Funcionalidades**:
     *   **Chat Inteligente**: Interface de conversação.
     *   **Painel de Estatísticas**: Visão geral da base indexada.
@@ -52,19 +52,19 @@ O IA_leg é baseado em uma arquitetura de **Retrieval-Augmented Generation (RAG)
 ```mermaid
 sequenceDiagram
     participant U as Usuário
-    participant D as Dashboard
+    participant F as Frontend
     participant R as Retriever (GPU)
     participant K as Reranker (GPU)
     participant L as LLM (Ollama)
 
-    U->>D: Faz pergunta (ex: "Qual a alíquota de ICMS sobre...")
-    D->>R: Busca vetores similares
-    R-->>D: Retorna Top 10 candidatos
-    D->>K: Reordena candidatos por relevância
-    K-->>D: Retorna Top 3 refinados
-    D->>L: Envia Prompt (Pergunta + Top 3 Contextos)
-    L-->>D: Gera resposta fundamentada
-    D->>U: Exibe resposta com citações
+    U->>F: Faz pergunta (ex: "Qual a alíquota de ICMS sobre...")
+    F->>R: Busca vetores similares
+    R-->>F: Retorna Top 10 candidatos
+    F->>K: Reordena candidatos por relevância
+    K-->>F: Retorna Top 3 refinados
+    F->>L: Envia Prompt (Pergunta + Top 3 Contextos)
+    L-->>F: Gera resposta fundamentada
+    F->>U: Exibe resposta com citações
 ```
 
 ---
@@ -74,7 +74,7 @@ sequenceDiagram
 | Camada | Tecnologia |
 |--------|------------|
 | **Linguagem** | Python 3.11 |
-| **Interface** | Streamlit |
+| **Interface** | React / TypeScript / Vite |
 | **Banco de Dados** | SQLite (Metadados + Vetores) |
 | **Deep Learning** | PyTorch / CUDA 12.1 |
 | **NLP** | Sentence-Transformers / Ollama |

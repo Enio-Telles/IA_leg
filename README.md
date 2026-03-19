@@ -55,7 +55,11 @@ conda activate leg_ia
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
 # 3. Instalar dependências do projeto
-pip install streamlit pandas sentence-transformers requests numpy polars python-dotenv
+pip install pandas sentence-transformers requests numpy polars python-dotenv
+
+# 4. Instalar dependências do Frontend
+cd frontend
+npm install
 ```
 
 ### 3. Configuração do LLM (Ollama)
@@ -75,9 +79,9 @@ python rag/embeddings.py
 ```
 *Tempo estimado: ~5-10 minutos com GPU ativa.*
 
-### B. Iniciar Dashboard (Interface Principal)
+### B. Iniciar Interface Principal
 ```bash
-streamlit run dashboard/app.py
+cd frontend && npm run dev
 ```
 
 ### C. Teste de Relevância (CLI)
@@ -90,7 +94,8 @@ python tests/test_reranker_relevancia.py
 
 ## 📂 Estrutura de Pastas
 *   `rag/`: Core do motor RAG (Embeddings, Retriever, Reranker).
-*   `dashboard/`: Interface Streamlit.
+*   `frontend/`: Interface React (SPA).
+*   `dashboard/`: Interface Streamlit (Legado).
 *   `etl/`: Scripts de limpeza e estruturação de dados.
 *   `database/`: Armazenamento SQLite (`metadata.db`).
 *   `config.py`: Parâmetros globais de modelos e caminhos.
