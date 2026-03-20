@@ -54,7 +54,15 @@ const ConsultaIA = () => {
 
       {/* Input Area */}
       <div className="p-6 bg-white border-t border-slate-200 shadow-[0_-4px_20px_-15px_rgba(0,0,0,0.1)]">
-        <div className="max-w-4xl mx-auto relative flex items-center">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (input.trim()) {
+              setInput('');
+            }
+          }}
+          className="max-w-4xl mx-auto relative flex items-center"
+        >
           <input
             type="text"
             value={input}
@@ -62,10 +70,15 @@ const ConsultaIA = () => {
             placeholder="Digite sua pergunta sobre legislação tributária..."
             className="w-full pl-6 pr-16 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-slate-700 shadow-inner"
           />
-          <button className="absolute right-3 p-2.5 bg-[#0f3460] hover:bg-[#16213e] text-white rounded-xl transition-colors shadow-md group">
-            <Send className="w-5 h-5 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          <button
+            type="submit"
+            aria-label="Enviar pergunta"
+            disabled={!input.trim()}
+            className="absolute right-3 p-2.5 bg-[#0f3460] hover:bg-[#16213e] text-white rounded-xl transition-colors shadow-md group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#0f3460]"
+          >
+            <Send className="w-5 h-5 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform group-disabled:transform-none" />
           </button>
-        </div>
+        </form>
         <p className="text-center text-xs text-slate-400 mt-3 font-medium">
           A IA pode cometer erros. Sempre verifique a legislação oficial vigente.
         </p>
