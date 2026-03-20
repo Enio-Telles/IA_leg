@@ -29,10 +29,14 @@ def obter_versao_indice() -> str:
     try:
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
-        cursor.execute("SELECT MAX(criado_em) FROM embeddings")
-        ultima_data = cursor.fetchone()[0]
+        # ⚡ Bolt: Using ORDER BY id DESC LIMIT 1 instead of MAX(criado_em)
+        # because 'id' is a Primary Key (indexed) while 'criado_em' is not.
+        # This turns an O(N) full table scan into an O(1) index lookup, eliminating
+        # significant DB latency while preserving the exact timestamp return value.
+        cursor.execute("SELECT criado_em FROM embeddings ORDER BY id DESC LIMIT 1")
+        resultado = cursor.fetchone()
         conn.close()
-        return ultima_data or "v0"
+        return resultado[0] if resultado else "v0"
     except Exception:
         return "v0"
 
