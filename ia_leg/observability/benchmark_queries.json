@@ -1,0 +1,32 @@
+[
+  {
+    "id": "q001",
+    "pergunta": "Qual a alíquota interna do ICMS em Rondônia?",
+    "expected_keywords": ["ICMS", "alíquota"],
+    "expected_anchor_terms": ["Art."]
+  },
+  {
+    "id": "q002",
+    "pergunta": "Como escriturar ajuste no E111 da EFD ICMS/IPI?",
+    "expected_keywords": ["E111", "EFD"],
+    "expected_anchor_terms": ["Registro", "E111"]
+  },
+  {
+    "id": "q003",
+    "pergunta": "Qual o entendimento do TATE sobre decadência do crédito tributário?",
+    "expected_keywords": ["TATE", "decadência"],
+    "expected_anchor_terms": ["Súmula", "Acórdão", "Jurisprudencia"]
+  },
+  {
+    "id": "q004",
+    "pergunta": "Qual o prazo para recolhimento do ICMS substituição tributária?",
+    "expected_keywords": ["ICMS", "substituição"],
+    "expected_anchor_terms": ["Art."]
+  },
+  {
+    "id": "q005",
+    "pergunta": "Existe orientação sobre ressarcimento de ICMS-ST em Rondônia?",
+    "expected_keywords": ["ressarcimento", "ICMS-ST"],
+    "expected_anchor_terms": ["Orientação", "Parecer", "Despacho"]
+  }
+]
