@@ -57,12 +57,17 @@ const ConsultaIA = () => {
         <div className="max-w-4xl mx-auto relative flex items-center">
           <input
             type="text"
+            aria-label="Pergunta sobre legislação tributária"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Digite sua pergunta sobre legislação tributária..."
             className="w-full pl-6 pr-16 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-slate-700 shadow-inner"
           />
-          <button className="absolute right-3 p-2.5 bg-[#0f3460] hover:bg-[#16213e] text-white rounded-xl transition-colors shadow-md group">
+          <button
+            aria-label="Enviar pergunta"
+            title="Enviar pergunta"
+            className="absolute right-3 p-2.5 bg-[#0f3460] hover:bg-[#16213e] text-white rounded-xl transition-colors shadow-md group"
+          >
             <Send className="w-5 h-5 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </button>
         </div>
