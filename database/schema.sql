@@ -86,3 +86,27 @@ CREATE TABLE query_logs (
     success BOOLEAN,
     criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE query_audit_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    pergunta TEXT NOT NULL,
+    backend TEXT,
+    model TEXT,
+    filtros TEXT,
+    top_k INTEGER,
+    min_score REAL,
+    exigir_ancoras BOOLEAN,
+    context_count INTEGER,
+    max_score REAL,
+    fallback_reason TEXT,
+    source_anchor_ok BOOLEAN,
+    source_identifiers TEXT,
+    source_normas TEXT,
+    response_preview TEXT,
+    prompt_chars INTEGER,
+    search_time_ms REAL,
+    rerank_time_ms REAL,
+    llm_time_ms REAL,
+    total_time_ms REAL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_query_audit_logs_created_at ON query_audit_logs(created_at);

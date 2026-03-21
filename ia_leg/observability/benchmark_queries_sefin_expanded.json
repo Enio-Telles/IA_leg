@@ -1,0 +1,22 @@
+[
+  {"id":"ro001","pergunta":"Qual a alíquota interna do ICMS em Rondônia?","expected_keywords":["ICMS","alíquota"],"expected_anchor_terms":["Art."]},
+  {"id":"ro002","pergunta":"Quais hipóteses de isenção de ICMS existem para cesta básica em Rondônia?","expected_keywords":["isenção","cesta básica"],"expected_anchor_terms":["Art.","Anexo"]},
+  {"id":"ro003","pergunta":"Qual o prazo para recolhimento do ICMS substituição tributária em Rondônia?","expected_keywords":["prazo","substituição tributária"],"expected_anchor_terms":["Art."]},
+  {"id":"ro004","pergunta":"Como escriturar ajuste no registro E111 da EFD ICMS/IPI?","expected_keywords":["E111","EFD"],"expected_anchor_terms":["Registro","E111"]},
+  {"id":"ro005","pergunta":"Como informar ressarcimento de ICMS-ST na EFD?","expected_keywords":["ressarcimento","ICMS-ST"],"expected_anchor_terms":["Registro","EFD"]},
+  {"id":"ro006","pergunta":"Existe orientação sobre Fisconforme em Rondônia?","expected_keywords":["Fisconforme","orientação"],"expected_anchor_terms":["Orientação","Despacho"]},
+  {"id":"ro007","pergunta":"Quais são as obrigações acessórias do contribuinte do ICMS em Rondônia?","expected_keywords":["obrigações acessórias","ICMS"],"expected_anchor_terms":["Art.","Guia"]},
+  {"id":"ro008","pergunta":"Qual o entendimento do TATE sobre decadência do crédito tributário?","expected_keywords":["TATE","decadência"],"expected_anchor_terms":["Súmula","Jurisprudencia","Acórdão"]},
+  {"id":"ro009","pergunta":"Qual o entendimento do TATE sobre nulidade do lançamento?","expected_keywords":["TATE","nulidade"],"expected_anchor_terms":["Jurisprudencia","Súmula"]},
+  {"id":"ro010","pergunta":"Qual a base de cálculo do ICMS sobre energia elétrica em Rondônia?","expected_keywords":["base de cálculo","energia elétrica"],"expected_anchor_terms":["Art."]},
+  {"id":"ro011","pergunta":"Há benefício fiscal para operação interna com arroz e feijão?","expected_keywords":["benefício fiscal","arroz","feijão"],"expected_anchor_terms":["Anexo","Art."]},
+  {"id":"ro012","pergunta":"Qual a disciplina sobre DIFAL em Rondônia?","expected_keywords":["DIFAL"],"expected_anchor_terms":["Art.","Lei Complementar"]},
+  {"id":"ro013","pergunta":"Como é tratada a antecipação tributária na legislação de Rondônia?","expected_keywords":["antecipação tributária"],"expected_anchor_terms":["Art."]},
+  {"id":"ro014","pergunta":"Existe manual para emissão de NF-e e NFC-e adotado na base do sistema?","expected_keywords":["NF-e","NFC-e","manual"],"expected_anchor_terms":["Manual","MOC"]},
+  {"id":"ro015","pergunta":"Quais regras tratam da restituição e ressarcimento de ICMS-ST?","expected_keywords":["restituição","ressarcimento","ICMS-ST"],"expected_anchor_terms":["Art.","Convênio"]},
+  {"id":"ro016","pergunta":"Qual a penalidade por falta de escrituração fiscal?","expected_keywords":["penalidade","escrituração fiscal"],"expected_anchor_terms":["Art."]},
+  {"id":"ro017","pergunta":"Qual a regra para crédito de ICMS sobre ativo imobilizado?","expected_keywords":["crédito","ativo imobilizado"],"expected_anchor_terms":["Art."]},
+  {"id":"ro018","pergunta":"Existe tratamento específico para combustíveis na legislação de Rondônia?","expected_keywords":["combustíveis"],"expected_anchor_terms":["Art.","Anexo"]},
+  {"id":"ro019","pergunta":"Como a legislação trata operações com energia elétrica para baixa renda?","expected_keywords":["energia elétrica","baixa renda"],"expected_anchor_terms":["Art."]},
+  {"id":"ro020","pergunta":"Quais atos normativos orientam o preenchimento da EFD ICMS/IPI?","expected_keywords":["EFD ICMS/IPI","preenchimento"],"expected_anchor_terms":["Guia","Registro","Manual"]}
+]
