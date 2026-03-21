@@ -9,14 +9,26 @@ Objetivo:
 
 Desative definindo:
     IA_LEG_ENABLE_SAFE_PATCHES=0
+Falhas podem ser forçadas em ambiente de teste/dev com:
+    IA_LEG_PATCH_FAIL_FAST=1
 """
 
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
 ENABLE_PATCHES = os.environ.get("IA_LEG_ENABLE_SAFE_PATCHES", "1") != "0"
+FAIL_FAST = os.environ.get("IA_LEG_PATCH_FAIL_FAST", "0") == "1"
+
+
+def _handle_patch_error(area: str, exc: Exception) -> None:
+    msg = f"[IA_leg patch error] {area}: {type(exc).__name__}: {exc}"
+    print(msg, file=sys.stderr)
+    if FAIL_FAST:
+        raise exc
+
 
 if ENABLE_PATCHES:
     try:
@@ -38,8 +50,8 @@ if ENABLE_PATCHES:
 
         answer_engine.consultar = _consultar_proxy
         answer_engine._IA_LEG_SAFE_PATCHED = True
-    except Exception:
-        pass
+    except Exception as exc:
+        _handle_patch_error("answer_engine", exc)
 
     try:
         import etl.versionamento_pipeline as versionamento_pipeline
@@ -80,5 +92,5 @@ if ENABLE_PATCHES:
         versionamento_pipeline.quebrar_dispositivos = _quebrar_dispositivos_proxy
         versionamento_pipeline.processar_tudo = _processar_tudo_proxy
         versionamento_pipeline._IA_LEG_SAFE_PATCHED = True
-    except Exception:
-        pass
+    except Exception as exc:
+        _handle_patch_error("versionamento_pipeline", exc)

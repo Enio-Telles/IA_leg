@@ -59,6 +59,7 @@ def avaliar_query(item: Dict[str, Any], backend: str = "ollama", top_k: int = 5,
         backend=backend,
         min_score=min_score,
         exigir_ancoras=True,
+        registrar_auditoria=False,
     )
 
     resposta = detalhado.get("response", "")

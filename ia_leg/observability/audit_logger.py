@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS query_audit_logs (
 
 
 def ensure_audit_schema() -> None:
+    """Mantido por compatibilidade; o schema principal já declara a tabela."""
     conn = sqlite3.connect(str(DB_PATH))
     try:
         conn.execute(CREATE_QUERY_AUDIT_LOGS_SQL)

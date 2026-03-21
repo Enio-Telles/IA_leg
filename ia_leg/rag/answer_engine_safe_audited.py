@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 import time
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from ia_leg.core.config.settings import LLM_MODEL
 from ia_leg.observability.audit_logger import registrar_query_audit
@@ -33,6 +33,7 @@ def consultar_seguro_detalhado(
     backend: str = "ollama",
     min_score: float = 0.20,
     exigir_ancoras: bool = True,
+    registrar_auditoria: bool = True,
 ) -> Dict[str, Any]:
     inicio_total = time.time()
     filtros = definir_filtros_por_pergunta(pergunta)
@@ -65,7 +66,8 @@ def consultar_seguro_detalhado(
             "llm_time_ms": 0.0,
             "total_time_ms": total_time_ms,
         }
-        registrar_query_audit(payload)
+        if registrar_auditoria:
+            registrar_query_audit(payload)
         payload["response"] = payload["response_preview"]
         return payload
 
@@ -102,7 +104,8 @@ def consultar_seguro_detalhado(
             "llm_time_ms": 0.0,
             "total_time_ms": total_time_ms,
         }
-        registrar_query_audit(payload)
+        if registrar_auditoria:
+            registrar_query_audit(payload)
         payload["response"] = response
         return payload
 
@@ -158,7 +161,8 @@ def consultar_seguro_detalhado(
         "llm_time_ms": llm_time_ms,
         "total_time_ms": total_time_ms,
     }
-    registrar_query_audit(payload)
+    if registrar_auditoria:
+        registrar_query_audit(payload)
     payload["response"] = resposta
     return payload
 
