@@ -1,0 +1,3 @@
+## 2024-05-24 - Optimizing the "Latest Entry" query for SQLite caching
+**Learning:** Using `MAX()` aggregation functions like `SELECT MAX(criado_em) FROM embeddings` on unindexed columns triggers an O(N) full table scan in SQLite, introducing significant latency as the database grows, particularly in areas like cache invalidation hooks (`obter_versao_indice`).
+**Action:** When querying for the most recent entry chronologically and the table uses auto-incrementing primary keys corresponding to insert order, replace `MAX(timestamp_column)` with an O(1) index lookup: `SELECT timestamp_column FROM table ORDER BY id DESC LIMIT 1`. This preserves exact behavior with drastically improved scaling.

@@ -29,8 +29,10 @@ def obter_versao_indice() -> str:
     try:
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
-        cursor.execute("SELECT MAX(criado_em) FROM embeddings")
-        ultima_data = cursor.fetchone()[0]
+        # O(1) index lookup using primary key instead of O(N) full table scan on unindexed criado_em
+        cursor.execute("SELECT criado_em FROM embeddings ORDER BY id DESC LIMIT 1")
+        row = cursor.fetchone()
+        ultima_data = row[0] if row else None
         conn.close()
         return ultima_data or "v0"
     except Exception:
