@@ -29,8 +29,11 @@ def obter_versao_indice() -> str:
     try:
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
-        cursor.execute("SELECT MAX(criado_em) FROM embeddings")
-        ultima_data = cursor.fetchone()[0]
+        # ⚡ Bolt: O(1) indexed max retrieval. Using ORDER BY id DESC LIMIT 1 leverages the AUTOINCREMENT PK index
+        # instead of a full table scan O(N) caused by MAX() on the unindexed criado_em column.
+        cursor.execute("SELECT criado_em FROM embeddings ORDER BY id DESC LIMIT 1")
+        row = cursor.fetchone()
+        ultima_data = row[0] if row else None
         conn.close()
         return ultima_data or "v0"
     except Exception:
