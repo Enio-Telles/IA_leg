@@ -79,11 +79,17 @@ for i in range(0, total, LOTE):
         vetores = modelo.encode(textos, show_progress_bar=False, normalize_embeddings=True)
         dt = time.time() - t0
 
+        # Otimização: Batch insert via executemany
+        dados_batch = [
+            (id_disp, vetor.astype(np.float32).tobytes(), MODELO_NOME)
+            for id_disp, vetor in zip(ids, vetores)
+        ]
+
         conn.execute("BEGIN TRANSACTION;")
-        for id_disp, vetor in zip(ids, vetores):
-            cursor.execute(
+        if dados_batch:
+            cursor.executemany(
                 "INSERT INTO embeddings (dispositivo_id, vetor, modelo) VALUES (?, ?, ?)",
-                (id_disp, vetor.astype(np.float32).tobytes(), MODELO_NOME)
+                dados_batch
             )
         conn.commit()
 
