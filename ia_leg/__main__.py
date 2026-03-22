@@ -16,6 +16,7 @@ import argparse
 import shutil
 import sqlite3
 import urllib.request
+import shlex
 from pathlib import Path
 
 # Adiciona o diretório base ao sys.path para garantir que os módulos internos sejam encontrados
@@ -55,8 +56,11 @@ def log(msg, tipo="info"):
     }
     print(f"  {icones.get(tipo, '')} {msg}{Cor.FIM}")
 
-def executar(cmd, cwd=None, shell=True, check=True, capturar=False):
-    """Executa um comando no shell."""
+def executar(cmd, cwd=None, shell=False, check=True, capturar=False):
+    """Executa um comando de forma segura."""
+    if not shell and isinstance(cmd, str):
+        cmd = shlex.split(cmd)
+
     try:
         result = subprocess.run(
             cmd,
@@ -118,7 +122,7 @@ def command_ingest():
     texto_dir = BASE_DIR / "documentos" / "texto"
     if texto_dir.exists() and any(texto_dir.glob("*.json")):
         log("Processando documentos JSON (versionamento)...", "info")
-        executar('python -c "from etl.versionamento_pipeline import processar_tudo; processar_tudo()"')
+        executar(["python", "-c", "from etl.versionamento_pipeline import processar_tudo; processar_tudo()"])
         log("Documentos JSON processados!", "ok")
     else:
         log("Nenhum JSON encontrado em documentos/texto/. Pulando.", "warn")
@@ -127,7 +131,7 @@ def command_ingest():
     pdf_dir = BASE_DIR / "documentos" / "pdf"
     if pdf_dir.exists() and any(pdf_dir.rglob("*.pdf")):
         log("Ingerindo PDFs locais (documentos/pdf/)...", "info")
-        executar("python scripts/ingerir_pdfs.py")
+        executar(["python", "scripts/ingerir_pdfs.py"])
         log("PDFs locais processados!", "ok")
     else:
         log("Nenhum PDF local encontrado. Pulando.", "warn")
@@ -136,7 +140,7 @@ def command_ingest():
     script_sefin_html = BASE_DIR / "scripts" / "ingerir_html_legislacao.py"
     if script_sefin_html.exists():
         log("Ingerindo HTMLs da base Legislacao_atual...", "info")
-        executar("python scripts/ingerir_html_legislacao.py")
+        executar(["python", "scripts/ingerir_html_legislacao.py"])
         log("HTMLs SEFIN processados!", "ok")
 
     log("Ingestão finalizada.", "ok")
@@ -144,7 +148,7 @@ def command_ingest():
 def command_index():
     """Gera embeddings vetoriais."""
     log("ETAPA — Geração de embeddings vetoriais", "etapa")
-    executar("python -m ia_leg.rag.embedding_service")
+    executar(["python", "-m", "ia_leg.rag.embedding_service"])
     log("Embeddings gerados com sucesso!", "ok")
 
 def command_serve():
@@ -164,14 +168,14 @@ def command_serve():
     log("ETAPA — Iniciando Dashboard", "etapa")
     log("Abrindo Dashboard Streamlit em http://localhost:8501", "info")
     try:
-        executar("streamlit run dashboard/app.py")
+        executar(["streamlit", "run", "dashboard/app.py"])
     except KeyboardInterrupt:
         print(f"\n{Cor.AMARELO}Sistema encerrado pelo usuário.{Cor.FIM}")
 
 def command_validate():
     """Executa validação (Testes de relevância e pipeline)."""
     log("ETAPA — Validando sistema (Testes)", "etapa")
-    executar("pytest tests/")
+    executar(["pytest", "tests/"])
     log("Validação finalizada.", "ok")
 
 # ─────────────────────────────────────────────────────────
