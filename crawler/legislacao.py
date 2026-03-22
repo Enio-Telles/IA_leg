@@ -7,7 +7,6 @@ import requests
 import json
 import sqlite3
 from pathlib import Path
-from datetime import datetime
 
 # Caminhos absolutos/relativos importados ou definidos localmente
 BASE_DIR = Path(__file__).resolve().parent.parent
