@@ -140,7 +140,7 @@ def ingerir_pdfs():
             versao_atual = cursor.fetchone()
             
             if versao_atual and versao_atual[1] == hash_texto:
-                print(f"  ✅ PDF já no banco de dados e sem alterações. Pulando.")
+                print("  ✅ PDF já no banco de dados e sem alterações. Pulando.")
                 conn.rollback()
                 continue
                 
@@ -158,11 +158,14 @@ def ingerir_pdfs():
             chunks = quebrar_pdf_em_chunks(texto_sujo)
             print(f"  ✂️ Dividido em {len(chunks)} trechos semânticos.")
             
-            for identificador, conteudo in chunks:
-                hash_disp = calcular_hash_texto(conteudo)
-                cursor.execute(
+            if chunks:
+                dispositivos_para_inserir = [
+                    (nova_versao_id, identificador, conteudo, calcular_hash_texto(conteudo))
+                    for identificador, conteudo in chunks
+                ]
+                cursor.executemany(
                     "INSERT INTO dispositivos (versao_id, identificador, texto, hash_dispositivo) VALUES (?, ?, ?, ?)",
-                    (nova_versao_id, identificador, conteudo, hash_disp)
+                    dispositivos_para_inserir
                 )
             
             conn.commit()
