@@ -2,6 +2,7 @@ from ia_leg.rag.citation_guard import (
     montar_fontes_verificadas,
     possui_ancoras_verificaveis,
     resposta_fallback_contextual,
+    score_maximo,
 )
 
 
@@ -31,3 +32,23 @@ def test_fallback_inclui_fontes():
 def test_fontes_verificadas_formatadas():
     bloco = montar_fontes_verificadas(_ctx())
     assert "score: 0.9100" in bloco
+
+def test_score_maximo():
+    # Contexto vazio
+    assert score_maximo([]) == 0.0
+
+    # Apenas score
+    assert score_maximo([{"score": 0.5}, {"score": 0.8}]) == 0.8
+
+    # Apenas score_rerank
+    assert score_maximo([{"score_rerank": 0.4}, {"score_rerank": 0.7}]) == 0.7
+
+    # Precedência (score_rerank deve ser usado se existir)
+    # Mesmo que o score base seja maior
+    assert score_maximo([{"score": 0.9, "score_rerank": 0.5}]) == 0.5
+
+    # Valores em string (deve converter para float)
+    assert score_maximo([{"score": "0.7"}, {"score_rerank": "0.85"}]) == 0.85
+
+    # Mix de chaves em diferentes dicionários
+    assert score_maximo([{"score": 0.9}, {"score_rerank": 0.6}]) == 0.9
