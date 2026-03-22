@@ -26,7 +26,7 @@ try:
     pdf_camara1 = r"c:\Users\eniot\OneDrive - SECRETARIA DE ESTADO DE FINANCAS\Desenvolvimento\IA_leg\documentos\pdf\Camara_Plena_tate\2024\Decisoes_02_2024\PAT_20133000200064.pdf"
     texto_camara = extrair_texto_pdf(pdf_camara1)
     data["camara_pat20133000200064"] = extract_ementa(texto_camara)
-except Exception as e:
+except Exception:
     pass
 
 try:
@@ -34,7 +34,7 @@ try:
         d1 = json.load(f)
         texto_sumula1 = d1.get("sumula", "")
         data["sumula_1"] = extract_sumula(texto_sumula1, "1")
-except Exception as e:
+except Exception:
     pass
 
 try:
@@ -44,7 +44,7 @@ try:
         data["sumula_2"] = extract_sumula(texto_sumula2, "2")
         texto_sumula3 = d2.get("sumula_3", "")
         data["sumula_3"] = extract_sumula(texto_sumula3, "3")
-except Exception as e:
+except Exception:
     pass
 
 
