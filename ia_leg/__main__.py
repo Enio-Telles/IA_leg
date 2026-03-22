@@ -22,7 +22,7 @@ from pathlib import Path
 # Adiciona o diretório base ao sys.path para garantir que os módulos internos sejam encontrados
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from ia_leg.core.config.settings import DB_PATH, ENVIRONMENT, LLM_MODEL, BASE_DIR
+from ia_leg.core.config.settings import DB_PATH, BASE_DIR
 
 # ─────────────────────────────────────────────────────────
 # UTILITÁRIOS E CORES
