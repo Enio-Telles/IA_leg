@@ -132,11 +132,14 @@ def salvar_documento_bd(
 
     # 5. Chunking
     chunks = quebrar_pdf_em_chunks(texto_completo)
-    for ident, conteudo in chunks:
-        hash_disp = calcular_hash_texto(conteudo)
-        cursor.execute(
+    dados_dispositivos = [
+        (nova_versao_id, ident, conteudo, calcular_hash_texto(conteudo))
+        for ident, conteudo in chunks
+    ]
+    if dados_dispositivos:
+        cursor.executemany(
             "INSERT INTO dispositivos (versao_id, identificador, texto, hash_dispositivo) VALUES (?, ?, ?, ?)",
-            (nova_versao_id, ident, conteudo, hash_disp),
+            dados_dispositivos,
         )
 
     return status
