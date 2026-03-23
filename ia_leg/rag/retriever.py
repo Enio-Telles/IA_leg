@@ -19,6 +19,7 @@ from ia_leg.rag.embedding_service import carregar_modelo
 _METADADOS_CACHE = None
 _MATRIX_CACHE = None
 _INDEX_VERSION = None
+_TIPOS_CACHE = None
 
 # Cache de queries repetidas
 _QUERY_CACHE = {}
@@ -42,17 +43,18 @@ def obter_versao_indice() -> str:
 
 def invalidar_cache():
     """Força recarga dos vetores e limpa queries (chamar após re-indexação)."""
-    global _METADADOS_CACHE, _MATRIX_CACHE, _INDEX_VERSION, _QUERY_CACHE
+    global _METADADOS_CACHE, _MATRIX_CACHE, _INDEX_VERSION, _QUERY_CACHE, _TIPOS_CACHE
     _METADADOS_CACHE = None
     _MATRIX_CACHE = None
     _INDEX_VERSION = None
+    _TIPOS_CACHE = None
     _QUERY_CACHE.clear()
     print("Cache de vetores invalidado.")
 
 
 def _carregar_vetores():
     """Carrega todos os vetores e metadados do banco, gerenciando a versão do cache."""
-    global _METADADOS_CACHE, _MATRIX_CACHE, _INDEX_VERSION, _QUERY_CACHE
+    global _METADADOS_CACHE, _MATRIX_CACHE, _INDEX_VERSION, _QUERY_CACHE, _TIPOS_CACHE
 
     versao_atual = obter_versao_indice()
 
@@ -78,6 +80,7 @@ def _carregar_vetores():
         _METADADOS_CACHE = []
         _MATRIX_CACHE = np.array([])
         _INDEX_VERSION = versao_atual
+        _TIPOS_CACHE = np.array([])
         return _METADADOS_CACHE, _MATRIX_CACHE
 
     # Separar metadados e vetores para operação vetorizada
@@ -98,6 +101,7 @@ def _carregar_vetores():
     _METADADOS_CACHE = metadados
     _MATRIX_CACHE = np.vstack(vetores)
     _INDEX_VERSION = versao_atual
+    _TIPOS_CACHE = np.array([m["tipo"].lower() for m in metadados])
 
     # Limpar cache de queries pois o índice base mudou
     _QUERY_CACHE.clear()
@@ -138,8 +142,8 @@ def recuperar_contexto(pergunta: str, top_k: int = 5, filtro_tipos: List[str] = 
     
     # Filtro
     if filtro_tipos:
-        filtro_tipos = [t.lower() for t in filtro_tipos]
-        mask = np.array([m["tipo"].lower() in filtro_tipos for m in metadados])
+        filtro_tipos_lower = [t.lower() for t in filtro_tipos]
+        mask = np.isin(_TIPOS_CACHE, filtro_tipos_lower)
         scores = np.where(mask, scores, -9999.0)
 
     # Top-K
