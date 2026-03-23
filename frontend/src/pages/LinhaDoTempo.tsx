@@ -24,11 +24,11 @@ const LinhaDoTempo = () => {
       {/* Filters */}
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row gap-6 items-end mb-8 sticky top-6 z-10 backdrop-blur-sm bg-white/90">
         <div className="flex-1 space-y-2">
-          <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+          <label htmlFor="filter-type" className="text-sm font-semibold text-slate-700 flex items-center gap-2 cursor-pointer">
             <Filter className="w-4 h-4 text-slate-400" /> Filtrar por tipo
           </label>
           <div className="relative">
-            <select
+            <select id="filter-type"
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
               className="w-full bg-slate-50 border border-slate-300 text-slate-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none font-medium"
@@ -44,11 +44,11 @@ const LinhaDoTempo = () => {
           </div>
         </div>
         <div className="w-full sm:w-64 space-y-2">
-          <label className="text-sm font-semibold text-slate-700 flex justify-between">
+          <label htmlFor="record-limit" className="text-sm font-semibold text-slate-700 flex justify-between cursor-pointer">
             <span>Registros: <span className="text-blue-600 font-bold">{limit}</span></span>
             <span className="text-slate-400">Máx: 200</span>
           </label>
-          <input
+          <input id="record-limit"
             type="range"
             min="10"
             max="200"

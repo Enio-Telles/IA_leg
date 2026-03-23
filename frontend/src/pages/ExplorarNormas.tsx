@@ -37,7 +37,7 @@ const ExplorarNormas = () => {
         <div className="absolute inset-y-0 left-0 flex items-center pl-5 pointer-events-none">
           <Search className="w-6 h-6 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
         </div>
-        <input
+        <input aria-label="Pesquisar por tipo, número ou ano"
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}

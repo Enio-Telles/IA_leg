@@ -55,7 +55,7 @@ const ConsultaIA = () => {
       {/* Input Area */}
       <div className="p-6 bg-white border-t border-slate-200 shadow-[0_-4px_20px_-15px_rgba(0,0,0,0.1)]">
         <div className="max-w-4xl mx-auto relative flex items-center">
-          <input
+          <input aria-label="Digite sua pergunta sobre legislação tributária..."
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
