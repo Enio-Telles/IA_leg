@@ -62,7 +62,10 @@ const ExplorarNormas = () => {
               {/* Accordion Header */}
               <button
                 onClick={() => toggleExpand(result.id)}
-                className="w-full px-6 py-5 flex items-center justify-between hover:bg-slate-50 transition-colors focus:outline-none focus:bg-slate-50"
+                aria-expanded={expanded === result.id}
+                aria-controls={`accordion-content-${result.id}`}
+                id={`accordion-header-${result.id}`}
+                className="w-full px-6 py-5 flex items-center justify-between hover:bg-slate-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 focus:bg-slate-50"
               >
                 <div className="flex items-center gap-4 text-left">
                   <span className="text-2xl">📋</span>
@@ -76,13 +79,13 @@ const ExplorarNormas = () => {
                   </div>
                 </div>
                 <div className={`p-2 rounded-full transition-colors ${expanded === result.id ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-400'}`}>
-                  {expanded === result.id ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                  {expanded === result.id ? <ChevronUp aria-hidden="true" className="w-5 h-5" /> : <ChevronDown aria-hidden="true" className="w-5 h-5" />}
                 </div>
               </button>
 
               {/* Accordion Content */}
               {expanded === result.id && (
-                <div className="border-t border-slate-100 bg-slate-50/50 p-6">
+                <div id={`accordion-content-${result.id}`} role="region" aria-labelledby={`accordion-header-${result.id}`} className="border-t border-slate-100 bg-slate-50/50 p-6">
                   <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
                     <Clock className="w-5 h-5 text-slate-400" /> Histórico de Versões
                   </h4>
