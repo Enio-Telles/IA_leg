@@ -10,7 +10,6 @@ from ia_leg.core.config.settings import BASE_DIR
 from etl.pdf_to_text import extrair_texto_pdf
 from etl.versionamento_pipeline import conectar, calcular_hash_texto, quebrar_pdf_em_chunks
 
-import os
 
 # Mapeamento estático baseado nos nomes de arquivos do projeto
 MAPA_METADADOS_PDF = {
