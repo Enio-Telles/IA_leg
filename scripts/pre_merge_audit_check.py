@@ -7,7 +7,6 @@ Uso:
 from __future__ import annotations
 
 from pathlib import Path
-import sys
 
 REQUIRED_FILES = [
     "sitecustomize.py",
