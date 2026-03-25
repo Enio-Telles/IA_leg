@@ -326,12 +326,16 @@ def ingerir_pdfs_sefin():
 
             # 5. Chunking & dispositivos
             chunks = quebrar_pdf_em_chunks(texto)
-            for identificador, conteudo in chunks:
-                hash_disp = calcular_hash_texto(conteudo)
-                cursor.execute(
-                    "INSERT INTO dispositivos (versao_id, identificador, texto, hash_dispositivo) VALUES (?, ?, ?, ?)",
-                    (nova_versao_id, identificador, conteudo, hash_disp),
-                )
+
+            dispositivos_data = [
+                (nova_versao_id, identificador, conteudo, calcular_hash_texto(conteudo))
+                for identificador, conteudo in chunks
+            ]
+
+            cursor.executemany(
+                "INSERT INTO dispositivos (versao_id, identificador, texto, hash_dispositivo) VALUES (?, ?, ?, ?)",
+                dispositivos_data,
+            )
 
             conn.commit()
             inseridos += 1
