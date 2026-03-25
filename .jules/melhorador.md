@@ -1,3 +1,6 @@
 ## 2024-05-20 - Batch Insert vs Individual Insert Latency
 **Learning:** SQLite database loops using `cursor.execute` in data pipelines (such as ETL processes for document parsing and embedding persistence) create an N+1 query latency issue, scaling linearly with data size and slowing ingestion speeds.
 **Action:** Always prefer array aggregation and `cursor.executemany` for database writes involving lists or data processing output blocks in `etl/` and `rag/` modules.
+## 2026-03-25 - Arquitetura IA_leg (RAG Jurídico)
+**Learning:** O repositório ia_leg possui uma arquitetura RAG sólida com parser hierárquico (Art > § > Inciso), Reranker (ms-marco), SQLite como banco de metadados e vetores (brute force numpy cosine sim), e guarda de segurança (citation_guard.py) para respostas LLM (Ollama). Há duplicidades no `answer_engine` (safe, safe_audited). A busca vetorial O(N) será gargalo e o modelo bge-m3 é pesado para CPU. A separação entre Frontend (React) e backend é visível, embora Dashboards Streamlit sejam operacionais no repositório. O SQLite armazena diff_estrutural e query_audit_logs.
+**Action:** Na proposta técnica ao usuário, destacar a necessidade de consolidar os motores de resposta, migrar de numpy brute-force para FAISS/ChromaDB, avançar na extração de PDFs pesados (OCR/tabelas) e modelar melhor as referências cruzadas normativas para RAG multi-hop.
