@@ -96,8 +96,6 @@ def executar_crawler(termos_busca=None):
     if termos_busca is None:
         termos_busca = ["", "RICMS", "Anexo"]
 
-    import urllib3
-    urllib3.disable_warnings()
 
     session = requests.Session()
     headers = {
@@ -124,7 +122,7 @@ def executar_crawler(termos_busca=None):
                     "q": termo
                 }
                 
-                resp = session.get(url_pesquisa, params=params, verify=False)
+                resp = session.get(url_pesquisa, params=params)
                 if resp.status_code != 200:
                     print(f"Falha ao pesquisar. Código {resp.status_code}")
                     break
@@ -155,7 +153,7 @@ def executar_crawler(termos_busca=None):
                     
                     # Obtem detalhes
                     url_detalhe = f"{BASE_URL}/pesquisar_detalhe_lei/{id_lei}"
-                    resp_detalhe = session.get(url_detalhe, verify=False)
+                    resp_detalhe = session.get(url_detalhe)
                     if resp_detalhe.status_code == 200:
                         detalhes = resp_detalhe.json()
                         salvar_norma(id_lei, detalhes)
