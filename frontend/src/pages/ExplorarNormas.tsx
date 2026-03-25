@@ -33,7 +33,7 @@ const ExplorarNormas = () => {
       </header>
 
       {/* Search Bar */}
-      <div className="relative group">
+      <form onSubmit={(e) => e.preventDefault()} className="relative group">
         <div className="absolute inset-y-0 left-0 flex items-center pl-5 pointer-events-none">
           <Search className="w-6 h-6 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
         </div>
@@ -42,12 +42,12 @@ const ExplorarNormas = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Pesquisar por tipo, número ou ano"
-          className="w-full pl-14 pr-6 py-5 bg-white border-2 border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-lg shadow-sm font-medium text-slate-800 placeholder-slate-400"
+          className="w-full pl-14 pr-6 py-5 bg-white border-2 border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-lg shadow-sm font-medium text-slate-800 placeholder-slate-500"
         />
-        <button className="absolute right-4 top-1/2 -translate-y-1/2 px-6 py-2.5 bg-[#0f3460] hover:bg-[#16213e] text-white rounded-xl transition-colors font-semibold shadow-md">
+        <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 px-6 py-2.5 bg-[#0f3460] hover:bg-[#16213e] text-white rounded-xl transition-colors font-semibold shadow-md focus-visible:ring-2 focus:outline-none focus-visible:ring-blue-500 focus-visible:ring-offset-2">
           Pesquisar
         </button>
-      </div>
+      </form>
 
       {/* Results */}
       <div className="space-y-6">
