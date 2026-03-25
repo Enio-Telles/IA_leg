@@ -95,7 +95,7 @@ def _chamar_ollama(prompt_usuario: str, modelo: Optional[str] = None) -> Tuple[O
 
 def _chamar_openai(prompt_usuario: str, modelo: Optional[str] = None) -> Tuple[Optional[str], float]:
     if not OPENAI_URL or not OPENAI_KEY:
-        return None, 0.0
+        raise ValueError("Configure OPENAI_URL e OPENAI_API_KEY nas variaveis de ambiente.")
 
     modelo = modelo or OPENAI_MODELO
     inicio = time.time()
