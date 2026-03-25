@@ -334,8 +334,9 @@ if pagina == "💬 Consulta IA":
         with st.chat_message("assistant", avatar="⚖️"):
             with st.spinner("Buscando na legislação e consultando IA..."):
                 try:
-                    from ia_leg.rag.answer_engine import consultar
-                    resposta = consultar(prompt, top_k=5, backend="ollama")
+                    from ia_leg.app.factory import get_answer_engine
+                    engine = get_answer_engine()
+                    resposta = engine(prompt, top_k=5, backend="ollama")
                 except Exception as e:
                     resposta = f"❌ Erro ao consultar: {e}"
 

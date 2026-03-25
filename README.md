@@ -168,7 +168,7 @@ python scripts/benchmark_ia_leg_audited.py
 ## Observações importantes
 
 - O frontend React continua existindo no repositório, mas **não é o caminho operacional principal desta branch**.
-- A consolidação do fluxo principal foi feita por `sitecustomize.py` e `usercustomize.py`. Isso entrega efeito operacional imediato, mas ainda pode ser refatorado depois para integração direta nos módulos principais.
+- A consolidação do fluxo principal FOI REFATORADA para não depender mais de `sitecustomize.py` e `usercustomize.py` (monkey patches). A nova abordagem utiliza um Factory Pattern explícito, selecionável pela variável de ambiente `IA_LEG_ENGINE_MODE`.
 - O painel auditado v2 é o **painel recomendado** para leitura de benchmark e auditoria nesta branch.
 
 ---
@@ -180,3 +180,20 @@ python scripts/benchmark_ia_leg_audited.py
 
 ---
 **SEFIN-RO** | Desenvolvimento Interno | 2026
+
+## ⚙️ Modos de Execução da Engine (Arquitetura Auditável)
+
+Para garantir previsibilidade, rastreabilidade e evitar acoplamento oculto (monkey patches), o IA_leg agora utiliza uma arquitetura baseada em **Factory** (`ia_leg/app/factory.py`) para injetar as estratégias de busca e RAG.
+
+Os scripts legados (`sitecustomize.py` e `usercustomize.py`) **foram depreciados** e não possuem mais efeitos colaterais na importação.
+
+Para configurar o comportamento de ponta-a-ponta, defina a variável de ambiente `IA_LEG_ENGINE_MODE` antes de iniciar a aplicação:
+
+- `IA_LEG_ENGINE_MODE=standard` (Padrão): Motor básico de respostas usando o chunking de ETL simples.
+- `IA_LEG_ENGINE_MODE=safe`: Ativa o motor restritivo (limite de scores mínimos e fallbacks) e aplica chunking jurídico hierárquico nos ETLs.
+- `IA_LEG_ENGINE_MODE=safe_audited`: Adiciona hooks de auditoria global à trilha segura, logando e validando de ponta a ponta as entradas e saídas normativas.
+
+**Exemplo Prático (Iniciando o Dashboard com Auditoria):**
+```bash
+IA_LEG_ENGINE_MODE=safe_audited python -m ia_leg serve
+```
