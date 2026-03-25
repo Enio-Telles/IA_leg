@@ -1,0 +1,23 @@
+--- scripts/ingerir_html_legislacao.py
++++ scripts/ingerir_html_legislacao.py
+@@ -135,11 +135,11 @@
+     # 5. Chunking
+     chunks = quebrar_pdf_em_chunks(texto_completo)
+-    if chunks:
+-        # Bolt ⚡: Replace N+1 queries with batch insert for performance
+-        dispositivos_para_inserir = [
+-            (nova_versao_id, ident, conteudo, calcular_hash_texto(conteudo))
+-            for ident, conteudo in chunks
+-        ]
+-        cursor.executemany(
+-            "INSERT INTO dispositivos (versao_id, identificador, texto, hash_dispositivo) VALUES (?, ?, ?, ?)",
+-            dispositivos_para_inserir,
+-        )
++    for ident, conteudo in chunks:
++        hash_disp = calcular_hash_texto(conteudo)
++        cursor.execute(
++            "INSERT INTO dispositivos (versao_id, identificador, texto, hash_dispositivo) VALUES (?, ?, ?, ?)",
++            (nova_versao_id, ident, conteudo, hash_disp),
++        )
+
+     return status
