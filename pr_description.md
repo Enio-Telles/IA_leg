@@ -1,8 +1,3 @@
-🎯 **What:** The `calcular_hash_texto` function in `etl/versionamento_pipeline.py` previously lacked unit tests. Testing it is crucial as it's a foundational utility for ensuring document versioning consistency across the application.
-📊 **Coverage:** A new suite of deterministic unit tests has been implemented covering:
-  * Standard text strings
-  * Empty strings
-  * Strings containing Unicode/special characters
-  * Strings with formatting elements like tabs and newlines
-  * Validation against a pre-calculated, known static SHA256 hash
-✨ **Result:** Test coverage for this utility module is now established. The new deterministic tests guarantee that changes to the system's runtime or Python environment won't silently alter encoding mechanisms, maintaining the integrity of the database's versioning hash keys.
+🎯 **What:** The fallback HTML to text extraction mechanism used a simplistic regular expression `re.sub(r'<[^>]+>', '\n', html_content)` which could be easily bypassed with malformed tags or specific attributes, leading to potential Cross-Site Scripting (XSS) if the extracted text was re-rendered.
+⚠️ **Risk:** By bypassing the regex, malicious HTML content could be parsed and treated as plain text, potentially exposing the application to XSS or HTML injection attacks.
+🛡️ **Solution:** Replaced the regex-based fallback with Python's built-in `html.parser.HTMLParser` to ensure robust and secure HTML parsing without external dependencies.
