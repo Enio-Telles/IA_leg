@@ -275,7 +275,8 @@ def processar_norma_json(caminho_json: str):
         nova_versao_id = cursor.lastrowid
 
         # 6️⃣ Reconstruir dispositivos
-        dispositivos_novos_list = quebrar_dispositivos(texto)
+        chunking_strategy = get_chunking_strategy()
+        dispositivos_novos_list = chunking_strategy(texto)
 
         # Comparação estrutural:
         if versao_atual:
@@ -387,22 +388,6 @@ def quebrar_pdf_em_chunks(
     return chunks
 
 
-def quebrar_dispositivos(texto: str):
-    """
-    Divide texto em dispositivos jurídicos básicos.
-    Estratégia simples baseada em 'Art.'
-    Pode evoluir para parser mais sofisticado.
-    """
-    partes = texto.split("Art.")
-    dispositivos = []
-
-    for parte in partes[1:]:
-        identificador = "Art. " + parte.split("\n")[0].strip()
-        conteudo = "Art." + parte
-        dispositivos.append((identificador, conteudo.strip()))
-
-    return dispositivos
-
 
 if __name__ == "__main__":
     from ia_leg.core.config.settings import BASE_DIR
@@ -420,4 +405,23 @@ if __name__ == "__main__":
             import traceback
 
             print(f"Falha ao processar {arq.name}: {e}")
+            traceback.print_exc()
+
+def processar_tudo():
+    """Processa todos os arquivos JSON da base (reindexação full)."""
+    import sys
+    from pathlib import Path
+
+    text_dir = Path(BASE_DIR) / "documentos" / "texto"
+    arquivos = sorted(text_dir.glob("*.json"))
+
+    print(f"Iniciando processamento ETL consolidado de {len(arquivos)} arquivos JSON.")
+    for arq in arquivos:
+        try:
+            print("----------------------------------------")
+            print(f"Processando {arq.name}...")
+            processar_norma_json(str(arq))
+        except Exception as exc:
+            import traceback
+            print(f"Falha ao processar {arq.name}: {exc}")
             traceback.print_exc()

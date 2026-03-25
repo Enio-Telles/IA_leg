@@ -1,37 +1,18 @@
 """
-Sobrescreve os patches de inicialização com a trilha segura auditada.
+[DEPRECATED] Sobrescreve patches de inicialização de trilha segura.
 
-Python importa `usercustomize` após `sitecustomize`, então este arquivo
-permite consolidar a engine auditada no fluxo principal sem alterar o
-arquivo `sitecustomize.py` diretamente.
+AVISO: O uso de monkey patches em tempo de importação para selecionar as engines
+foi substituído pelo Factory pattern (`ia_leg.app.factory.py`).
+Esta abordagem era inaceitável para um sistema jurídico auditável e foi depreciada.
+
+Por favor, configure o comportamento da engine através da variável de ambiente:
+    IA_LEG_ENGINE_MODE=standard|safe|safe_audited
 """
 
-from __future__ import annotations
+import logging
 
-import os
-import sys
+logger = logging.getLogger(__name__)
 
-try:
-    import ia_leg.rag.answer_engine as answer_engine
-    from ia_leg.rag.answer_engine_safe_audited import consultar_seguro
-
-    SAFE_TOP_K = int(os.environ.get("IA_LEG_SAFE_TOP_K", "5"))
-    SAFE_MIN_SCORE = float(os.environ.get("IA_LEG_SAFE_MIN_SCORE", "0.20"))
-    SAFE_REQUIRE_ANCHORS = os.environ.get("IA_LEG_SAFE_REQUIRE_ANCHORS", "1") != "0"
-    FAIL_FAST = os.environ.get("IA_LEG_PATCH_FAIL_FAST", "0") == "1"
-
-    def _consultar_proxy(pergunta: str, top_k: int = 5, backend: str = "ollama") -> str:
-        return consultar_seguro(
-            pergunta,
-            top_k=top_k or SAFE_TOP_K,
-            backend=backend,
-            min_score=SAFE_MIN_SCORE,
-            exigir_ancoras=SAFE_REQUIRE_ANCHORS,
-        )
-
-    answer_engine.consultar = _consultar_proxy
-    answer_engine._IA_LEG_SAFE_AUDITED_PATCHED = True
-except Exception as exc:
-    print(f"[IA_leg patch error] usercustomize: {type(exc).__name__}: {exc}", file=sys.stderr)
-    if os.environ.get("IA_LEG_PATCH_FAIL_FAST", "0") == "1":
-        raise
+# Mantido inativo para evitar erros de dependência antigos em imports globais
+logger.warning("[IA_leg Warning] O uso do `usercustomize.py` para patches automáticos está desativado.")
+logger.warning("Use a variável de ambiente `IA_LEG_ENGINE_MODE` para configurar a engine.")
