@@ -14,6 +14,8 @@ import os
 import time
 from typing import Dict, List, Optional, Tuple
 
+from ia_leg.rag.reranker import rerankar
+
 import requests
 
 from ia_leg.core.config.settings import LLM_MODEL
@@ -148,17 +150,6 @@ def _chamar_openai(
         return None, (time.time() - inicio) * 1000
 
 
-def _rerankar_se_disponivel(
-    pergunta: str, contextos: List[Dict], top_k: int
-) -> List[Dict]:
-    try:
-        from ia_leg.rag.reranker import rerankar
-
-        return rerankar(pergunta, contextos, top_k=top_k)
-    except Exception:
-        return contextos[:top_k]
-
-
 def consultar_seguro(
     pergunta: str,
     top_k: int = 5,
@@ -178,8 +169,11 @@ def consultar_seguro(
 
     if not contextos:
         return "Não localizei trechos suficientes na base vetorial para responder com segurança."
-
-    contextos = _rerankar_se_disponivel(pergunta, contextos, top_k=top_k)
+    try:
+        contextos = rerankar(pergunta, contextos, top_k=top_k)
+    except Exception as e:
+        print(f"⚠️ Reranker indisponível ({e}), usando scores originais.")
+        contextos = contextos[:top_k]
 
     if score_maximo(contextos) < min_score:
         return resposta_fallback_contextual(

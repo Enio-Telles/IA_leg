@@ -4,11 +4,12 @@ Mede métricas de pipeline e integra com Ollama ou APIs OpenAI-compatible.
 """
 
 import requests
-import json
 import os
 import time
 import sqlite3
 from typing import List, Dict, Optional, Tuple
+
+from ia_leg.rag.reranker import rerankar
 
 from ia_leg.core.config.settings import LLM_MODEL, DB_PATH
 
@@ -314,12 +315,7 @@ def consultar(pergunta: str, top_k: int = 5, backend: str = "ollama") -> str:
         return "Não foram encontrados dispositivos ou trechos de manuais na base vetorial que correspondam à sua busca."
 
     try:
-        # TODO: Refatorar reranker futuramente, por enquanto isolamos o timing
         inicio_rerank = time.time()
-        from ia_leg.rag.reranker import (
-            rerankar,
-        )  # Temporary, to be fixed in next phase if not refactored yet
-
         contextos = rerankar(pergunta, contextos, top_k=top_k)
         metricas["rerank_time_ms"] = (time.time() - inicio_rerank) * 1000
     except Exception as e:

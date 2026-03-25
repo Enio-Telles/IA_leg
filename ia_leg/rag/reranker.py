@@ -3,7 +3,6 @@ Reranker cross-encoder para refinar resultados da busca vetorial.
 Segunda passada de relevância que melhora a precisão das respostas do RAG.
 """
 
-import torch
 from typing import List, Dict
 
 _RERANKER = None
@@ -15,6 +14,7 @@ def carregar_reranker():
     global _RERANKER
     if _RERANKER is None:
         try:
+            import torch
             from sentence_transformers import CrossEncoder
         except ImportError:
             raise ImportError("Instale 'sentence-transformers' para usar o reranker")

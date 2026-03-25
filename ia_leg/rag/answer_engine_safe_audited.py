@@ -6,6 +6,8 @@ import os
 import time
 from typing import Any, Dict
 
+from ia_leg.rag.reranker import rerankar
+
 from ia_leg.core.config.settings import LLM_MODEL
 from ia_leg.observability.audit_logger import registrar_query_audit
 from ia_leg.rag.citation_guard import (
@@ -18,7 +20,6 @@ from ia_leg.rag.answer_engine_safe import (
     _chamar_ollama,
     _chamar_openai,
     _montar_prompt_seguro,
-    _rerankar_se_disponivel,
 )
 from ia_leg.rag.answer_engine import definir_filtros_por_pergunta
 from ia_leg.rag.retriever import recuperar_contexto
@@ -72,7 +73,11 @@ def consultar_seguro_detalhado(
         return payload
 
     inicio_rerank = time.time()
-    contextos = _rerankar_se_disponivel(pergunta, contextos, top_k=top_k)
+    try:
+        contextos = rerankar(pergunta, contextos, top_k=top_k)
+    except Exception as e:
+        print(f"⚠️ Reranker indisponível ({e}), usando scores originais.")
+        contextos = contextos[:top_k]
     rerank_time_ms = (time.time() - inicio_rerank) * 1000
     max_score = score_maximo(contextos)
 
