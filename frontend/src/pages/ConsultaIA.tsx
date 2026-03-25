@@ -54,7 +54,7 @@ const ConsultaIA = () => {
 
       {/* Input Area */}
       <div className="p-6 bg-white border-t border-slate-200 shadow-[0_-4px_20px_-15px_rgba(0,0,0,0.1)]">
-        <div className="max-w-4xl mx-auto relative flex items-center">
+        <form onSubmit={(e) => { e.preventDefault();   }} className="max-w-4xl mx-auto relative flex items-center">
           <input aria-label="Digite sua pergunta sobre legislação tributária..."
             type="text"
             value={input}
@@ -63,15 +63,16 @@ const ConsultaIA = () => {
             className="w-full pl-6 pr-16 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-slate-700 shadow-inner"
           />
           <button
+            type="submit"
             aria-label="Enviar pergunta"
-            title="Enviar pergunta"
+            title={!input.trim() ? "Digite uma pergunta para enviar" : "Enviar pergunta"}
             disabled={!input.trim()}
             className="absolute right-3 p-2.5 bg-[#0f3460] hover:bg-[#16213e] text-white rounded-xl transition-colors shadow-md group disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="w-5 h-5 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </button>
-        </div>
-        <p className="text-center text-xs text-slate-400 mt-3 font-medium">
+        </form>
+        <p className="text-center text-xs text-slate-500 mt-3 font-medium">
           A IA pode cometer erros. Sempre verifique a legislação oficial vigente.
         </p>
       </div>
