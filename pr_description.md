@@ -1,8 +1,8 @@
-🎯 **What:**
-Fixed a vulnerability where missing OpenAI API keys resulted in silent failures. Previously, the system logged a message and returned `(None, 0.0)` which could mask misconfigurations or lead to unexpected and potentially insecure behavior in upstream components that consume the LLM output.
-
-⚠️ **Risk:**
-If left unfixed, the lack of an explicit failure could lead to unpredictable downstream behavior or silent application degradation if API credentials were unintentionally removed, compromised and rotated, or misconfigured. This obfuscates root causes and violates the fail-fast principle.
-
-🛡️ **Solution:**
-Modified `chamar_openai` in `ia_leg/rag/answer_engine.py` and `_chamar_openai` in `ia_leg/rag/answer_engine_safe.py` to raise a `ValueError` explicitly when `OPENAI_URL` or `OPENAI_KEY` are not set. This guarantees the system fails fast and loudly on missing required credentials.
+🎯 **What:** The `calcular_hash_texto` function in `etl/versionamento_pipeline.py` previously lacked unit tests. Testing it is crucial as it's a foundational utility for ensuring document versioning consistency across the application.
+📊 **Coverage:** A new suite of deterministic unit tests has been implemented covering:
+  * Standard text strings
+  * Empty strings
+  * Strings containing Unicode/special characters
+  * Strings with formatting elements like tabs and newlines
+  * Validation against a pre-calculated, known static SHA256 hash
+✨ **Result:** Test coverage for this utility module is now established. The new deterministic tests guarantee that changes to the system's runtime or Python environment won't silently alter encoding mechanisms, maintaining the integrity of the database's versioning hash keys.
