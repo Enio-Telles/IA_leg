@@ -2,11 +2,23 @@
 Converte HTML bruto em texto simples.
 """
 import re
+from html.parser import HTMLParser
 
 try:
     from bs4 import BeautifulSoup
 except ImportError:
     pass
+
+class _FallbackHTMLParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.text_parts = []
+
+    def handle_data(self, data):
+        self.text_parts.append(data)
+
+    def get_text(self):
+        return "\n".join(self.text_parts)
 
 def extrair_texto_html(html_content: str) -> str:
     """Extrai texto limpo de um conteúdo HTML."""
@@ -18,7 +30,9 @@ def extrair_texto_html(html_content: str) -> str:
         texto = soup.get_text(separator="\n")
     except NameError:
         # Fallback caso bs4 não esteja instalado
-        texto = re.sub(r'<[^>]+>', '\n', html_content)
+        parser = _FallbackHTMLParser()
+        parser.feed(html_content)
+        texto = parser.get_text()
     
     # Limpeza básica
     linhas = [linha.strip() for linha in texto.split('\n') if linha.strip()]

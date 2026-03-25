@@ -23,7 +23,7 @@ def test_extrair_texto_html_fallback():
     html = "<html><body><h1>Título</h1><p>Parágrafo 1.</p></body></html>"
 
     # Mock para forçar a exceção NameError quando BeautifulSoup for chamado
-    with patch("etl.html_to_text.BeautifulSoup", side_effect=NameError("name 'BeautifulSoup' is not defined")):
+    with patch("etl.html_to_text.BeautifulSoup", side_effect=NameError("name 'BeautifulSoup' is not defined"), create=True):
         resultado = extrair_texto_html(html)
 
         assert "Título" in resultado
