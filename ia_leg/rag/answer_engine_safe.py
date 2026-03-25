@@ -24,6 +24,17 @@ from ia_leg.rag.citation_guard import (
     score_maximo,
 )
 
+from urllib.parse import urlparse
+
+
+def validar_url_http(url: str) -> bool:
+    try:
+        parsed = urlparse(url)
+        return parsed.scheme in ["http", "https"] and bool(parsed.netloc)
+    except Exception:
+        return False
+
+
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
 OLLAMA_MODELO = os.environ.get("OLLAMA_MODELO", LLM_MODEL)
 
@@ -68,9 +79,14 @@ def _montar_prompt_seguro(pergunta: str, contextos: List[Dict]) -> str:
     )
 
 
-def _chamar_ollama(prompt_usuario: str, modelo: Optional[str] = None) -> Tuple[Optional[str], float]:
+def _chamar_ollama(
+    prompt_usuario: str, modelo: Optional[str] = None
+) -> Tuple[Optional[str], float]:
     modelo = modelo or OLLAMA_MODELO
     inicio = time.time()
+    if not validar_url_http(OLLAMA_URL):
+        print(f"Erro Ollama: URL configurada é inválida ({OLLAMA_URL})")
+        return None, (time.time() - inicio) * 1000
     try:
         resposta = requests.post(
             f"{OLLAMA_URL}/api/chat",
@@ -93,12 +109,19 @@ def _chamar_ollama(prompt_usuario: str, modelo: Optional[str] = None) -> Tuple[O
         return None, (time.time() - inicio) * 1000
 
 
-def _chamar_openai(prompt_usuario: str, modelo: Optional[str] = None) -> Tuple[Optional[str], float]:
+def _chamar_openai(
+    prompt_usuario: str, modelo: Optional[str] = None
+) -> Tuple[Optional[str], float]:
     if not OPENAI_URL or not OPENAI_KEY:
-        raise ValueError("Configure OPENAI_URL e OPENAI_API_KEY nas variaveis de ambiente.")
+        raise ValueError(
+            "Configure OPENAI_URL e OPENAI_API_KEY nas variaveis de ambiente."
+        )
 
     modelo = modelo or OPENAI_MODELO
     inicio = time.time()
+    if not validar_url_http(OPENAI_URL):
+        print(f"Erro OpenAI: URL configurada é inválida ({OPENAI_URL})")
+        return None, (time.time() - inicio) * 1000
     try:
         resposta = requests.post(
             f"{OPENAI_URL}/chat/completions",
@@ -125,7 +148,9 @@ def _chamar_openai(prompt_usuario: str, modelo: Optional[str] = None) -> Tuple[O
         return None, (time.time() - inicio) * 1000
 
 
-def _rerankar_se_disponivel(pergunta: str, contextos: List[Dict], top_k: int) -> List[Dict]:
+def _rerankar_se_disponivel(
+    pergunta: str, contextos: List[Dict], top_k: int
+) -> List[Dict]:
     try:
         from ia_leg.rag.reranker import rerankar
 
@@ -152,9 +177,7 @@ def consultar_seguro(
     )
 
     if not contextos:
-        return (
-            "Não localizei trechos suficientes na base vetorial para responder com segurança."
-        )
+        return "Não localizei trechos suficientes na base vetorial para responder com segurança."
 
     contextos = _rerankar_se_disponivel(pergunta, contextos, top_k=top_k)
 
