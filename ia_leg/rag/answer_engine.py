@@ -144,8 +144,7 @@ def chamar_ollama(prompt_usuario: str, modelo: str = None) -> Tuple[Optional[str
 
 def chamar_openai(prompt_usuario: str, modelo: str = None) -> Tuple[Optional[str], float]:
     if not OPENAI_URL or not OPENAI_KEY:
-        print("Configure OPENAI_URL e OPENAI_API_KEY nas variáveis de ambiente.")
-        return None, 0.0
+        raise ValueError("Configure OPENAI_URL e OPENAI_API_KEY nas variaveis de ambiente.")
     
     modelo = modelo or OPENAI_MODELO
     inicio = time.time()
