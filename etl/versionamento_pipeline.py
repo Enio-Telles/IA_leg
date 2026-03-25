@@ -322,14 +322,17 @@ def processar_norma_json(caminho_json: str):
         if textos:
             vetores = gerar_embeddings(textos)
             if vetores:
-                for (disp_id, _), vetor in zip(novos_dispositivos_banco, vetores):
-                    cursor.execute(
-                        \"\"\"
-                        INSERT INTO embeddings (dispositivo_id, vetor, modelo)
-                        VALUES (?, ?, ?)
-                        \"\"\",
-                        (disp_id, vetor.tobytes(), "bge-m3"),
-                    )
+                dados_embeddings = [
+                    (disp_id, vetor.tobytes(), "bge-m3")
+                    for (disp_id, _), vetor in zip(novos_dispositivos_banco, vetores)
+                ]
+                cursor.executemany(
+                    '''
+                    INSERT INTO embeddings (dispositivo_id, vetor, modelo)
+                    VALUES (?, ?, ?)
+                    ''',
+                    dados_embeddings,
+                )
         """
 
         conn.commit()
