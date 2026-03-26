@@ -7,3 +7,7 @@
 **Vulnerability:** Server-Side Request Forgery (SSRF) via unvalidated URLs from environment variables `OLLAMA_URL` and `OPENAI_URL` inside `requests.post()` in `answer_engine.py` and `answer_engine_safe.py`.
 **Learning:** Even though environment variables are generally trusted by administrators, they represent an attack surface where an insecure value could result in arbitrary requests made from the application server, potentially exposing internal networks.
 **Prevention:** Always validate and sanitize URLs, ensuring they strictly follow `http` or `https` schemes and have a valid network location, prior to performing external requests, utilizing standard library modules like `urllib.parse`.
+## 2025-05-24 - Cross-Site Scripting (XSS) in Streamlit Text Render
+**Vulnerability:** The Streamlit dashboard rendered database content using `st.markdown(f"<div>{texto}</div>", unsafe_allow_html=True)` without any HTML escaping. If malicious HTML tags were stored in the `texto_integral` database column, they would be executed in the user's browser, leading to XSS.
+**Learning:** Functions that force HTML rendering (like `unsafe_allow_html=True` in Streamlit) bypass built-in framework protections. Database content, even if it seems safe, should be treated as untrusted user input when rendered as HTML to prevent stored XSS.
+**Prevention:** Always escape dynamic content before injecting it into raw HTML wrappers using standard library functions like `html.escape()` in Python.

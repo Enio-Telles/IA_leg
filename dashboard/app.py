@@ -10,6 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
+import html
 import sqlite3
 import pandas as pd
 from datetime import datetime
@@ -239,7 +240,7 @@ def modal_ler_texto(versao_id):
     conn = get_db_connection()
     df = pd.read_sql("SELECT texto_integral FROM versoes_norma WHERE id = ?", conn, params=[versao_id])
     if not df.empty:
-        texto = df.iloc[0]['texto_integral']
+        texto = html.escape(str(df.iloc[0]['texto_integral']))
         st.markdown(f"<div style='white-space: pre-wrap; font-family: monospace; font-size: 14px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;'>{texto}</div>", unsafe_allow_html=True)
     else:
         st.error("Texto não encontrado.")
