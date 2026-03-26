@@ -1,3 +1,4 @@
-🎯 **What:** The fallback HTML to text extraction mechanism used a simplistic regular expression `re.sub(r'<[^>]+>', '\n', html_content)` which could be easily bypassed with malformed tags or specific attributes, leading to potential Cross-Site Scripting (XSS) if the extracted text was re-rendered.
-⚠️ **Risk:** By bypassing the regex, malicious HTML content could be parsed and treated as plain text, potentially exposing the application to XSS or HTML injection attacks.
-🛡️ **Solution:** Replaced the regex-based fallback with Python's built-in `html.parser.HTMLParser` to ensure robust and secure HTML parsing without external dependencies.
+💡 What: Added accessible focus rings (`focus-visible:ring-2`) and dynamic, context-aware `aria-label`s to generic interactive elements like "Ler Texto" and "Detalhes" buttons in the "Explorar Normas" and "Linha do Tempo" lists, as well as the limit range input.
+🎯 Why: Screen reader users could not determine which specific item was being interacted with when hearing only "Ler Texto", and keyboard navigators lacked a visual indicator when tabbing through dynamic lists or the custom range input.
+📸 Before/After: Interactive elements now display a blue focus ring on keyboard navigation, and `aria-label`s provide clear context like `Ler texto da versão de [date] de [type] [number]`.
+♿ Accessibility: Improves WCAG 2.1 compliance for Focus Visible (2.4.7) and Name, Role, Value (4.1.2) without affecting mouse-user visual design.

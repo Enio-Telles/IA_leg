@@ -54,7 +54,7 @@ const LinhaDoTempo = () => {
             max="200"
             value={limit}
             onChange={(e) => setLimit(Number(e.target.value))}
-            className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+            className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           />
         </div>
       </div>
@@ -88,7 +88,8 @@ const LinhaDoTempo = () => {
                 </div>
               </div>
 
-              <button className="px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 text-sm font-semibold rounded-lg border border-slate-200 transition-colors">
+              <button className="px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 text-sm font-semibold rounded-lg border border-slate-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                aria-label={`Ver detalhes sobre ${item.type}`}>
                 Detalhes
               </button>
             </div>
