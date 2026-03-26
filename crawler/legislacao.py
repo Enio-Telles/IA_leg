@@ -6,7 +6,6 @@ Realiza coleta via API e controle por banco de dados SQLite para evitar duplicid
 import requests
 import json
 import sqlite3
-
 from pathlib import Path
 from datetime import datetime
 
