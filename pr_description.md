@@ -1,4 +1,6 @@
-💡 What: Added accessible focus rings (`focus-visible:ring-2`) and dynamic, context-aware `aria-label`s to generic interactive elements like "Ler Texto" and "Detalhes" buttons in the "Explorar Normas" and "Linha do Tempo" lists, as well as the limit range input.
-🎯 Why: Screen reader users could not determine which specific item was being interacted with when hearing only "Ler Texto", and keyboard navigators lacked a visual indicator when tabbing through dynamic lists or the custom range input.
-📸 Before/After: Interactive elements now display a blue focus ring on keyboard navigation, and `aria-label`s provide clear context like `Ler texto da versão de [date] de [type] [number]`.
-♿ Accessibility: Improves WCAG 2.1 compliance for Focus Visible (2.4.7) and Name, Role, Value (4.1.2) without affecting mouse-user visual design.
+🎨 Palette: [UX improvement] Adding loading states and accessible focus for chat input
+
+💡 **What:** Added a `Loader2` spinner to the form submit button in `ConsultaIA.tsx`. Disabled the button and text input during the loading state. Also added explicit `focus-visible` ring styling to the submit button.
+🎯 **Why:** Users need visual feedback when waiting for an async AI response to prevent duplicate submissions and frustration. Keyboard-only and screen reader users also need to see clearly when the button is focused, since it was previously stripped of focus rings via `focus:outline-none`.
+📸 **Before/After:** See `verification/focused.png` and `verification/loading.png`.
+♿️ **Accessibility:** Improved keyboard accessibility with `focus-visible:ring-2 focus-visible:ring-blue-500` and `disabled` states to inform assistive technologies when the form is processing.
