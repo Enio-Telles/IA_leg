@@ -7,3 +7,6 @@
 
 **Learning:** Filtering lists of metadata dictionaries using string manipulations inside Python list comprehensions (e.g., `[m["tipo"].lower() in list]`) during RAG retrieval creates a significant $O(N)$ CPU bottleneck on every query.
 **Action:** Move the lowercase transformation to the vector load phase (`_carregar_vetores`), cache the results in a dedicated NumPy array (e.g., `_TIPOS_CACHE`), and use the highly optimized vectorized `np.isin()` function for real-time query filtering, which yields a ~10x speedup in mask generation.
+## 2026-03-27 - Streamlit DataFrame Instantiation Overhead
+**Learning:** In Streamlit dashboards, multiple sequential `pd.read_sql` calls or loops to gather database statistics cause severe N+1 query latency, largely dominated by Pandas DataFrame instantiation overhead rather than just DB round-trips.
+**Action:** Always combine and batch database statistics into a single SQL query (using subselects or `GROUP BY` with an `IN` clause) and process the resulting single DataFrame to minimize latency.

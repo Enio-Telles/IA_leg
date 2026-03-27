@@ -128,12 +128,21 @@ def carregar_modelo_rag():
 @st.cache_data(ttl=60)
 def carregar_estatisticas():
     conn = get_db_connection()
-    stats = {}
-    stats["normas"] = pd.read_sql("SELECT COUNT(*) as total FROM normas", conn).iloc[0]["total"]
-    stats["dispositivos"] = pd.read_sql("SELECT COUNT(*) as total FROM dispositivos", conn).iloc[0]["total"]
-    stats["embeddings"] = pd.read_sql("SELECT COUNT(*) as total FROM embeddings", conn).iloc[0]["total"]
-    stats["versoes"] = pd.read_sql("SELECT COUNT(*) as total FROM versoes_norma", conn).iloc[0]["total"]
-    return stats
+    # ⚡ Bolt: Replace multiple pd.read_sql calls with a single batched query to avoid N+1 latency
+    query = """
+        SELECT
+            (SELECT COUNT(*) FROM normas) as normas,
+            (SELECT COUNT(*) FROM dispositivos) as dispositivos,
+            (SELECT COUNT(*) FROM embeddings) as embeddings,
+            (SELECT COUNT(*) FROM versoes_norma) as versoes
+    """
+    df = pd.read_sql(query, conn)
+    return {
+        "normas": int(df.iloc[0]["normas"]),
+        "dispositivos": int(df.iloc[0]["dispositivos"]),
+        "embeddings": int(df.iloc[0]["embeddings"]),
+        "versoes": int(df.iloc[0]["versoes"]),
+    }
 
 @st.cache_data(ttl=60)
 def carregar_normas_por_tipo():
@@ -165,27 +174,40 @@ def carregar_detalhamento_rag():
 def carregar_stats_jurisprudencia():
     """Carrega estatísticas detalhadas sobre a base jurisprudencial TATE."""
     conn = get_db_connection()
-    stats = {}
-    for tipo, key in [
-        ("Jurisprudencia_TATE_Camara_Plena", "camara_plena"),
-        ("Sumula_TATE", "sumulas"),
-        ("Jurisprudencia_TATE", "enunciados"),
-        ("Orientacao", "orientacoes"),
-    ]:
-        df = pd.read_sql(
-            "SELECT COUNT(*) as normas FROM normas WHERE tipo=?",
-            conn, params=[tipo]
-        )
-        stats[key] = df.iloc[0]["normas"]
-        
-        df2 = pd.read_sql("""
-            SELECT COUNT(d.id) as chunks
-            FROM dispositivos d
-            JOIN versoes_norma v ON d.versao_id = v.id
-            JOIN normas n ON v.norma_id = n.id
-            WHERE n.tipo=? AND v.vigencia_fim IS NULL
-        """, conn, params=[tipo])
-        stats[key + "_chunks"] = df2.iloc[0]["chunks"]
+    # ⚡ Bolt: Replace O(N) loop of pd.read_sql queries with a single batched GROUP BY query
+    query = """
+        SELECT n.tipo,
+               COUNT(DISTINCT n.id) as normas,
+               COUNT(d.id) as chunks
+        FROM normas n
+        LEFT JOIN versoes_norma v ON n.id = v.norma_id AND v.vigencia_fim IS NULL
+        LEFT JOIN dispositivos d ON v.id = d.versao_id
+        WHERE n.tipo IN ('Jurisprudencia_TATE_Camara_Plena', 'Sumula_TATE', 'Jurisprudencia_TATE', 'Orientacao')
+        GROUP BY n.tipo
+    """
+    df = pd.read_sql(query, conn)
+
+    mapping = {
+        "Jurisprudencia_TATE_Camara_Plena": "camara_plena",
+        "Sumula_TATE": "sumulas",
+        "Jurisprudencia_TATE": "enunciados",
+        "Orientacao": "orientacoes",
+    }
+
+    stats = {
+        "camara_plena": 0, "camara_plena_chunks": 0,
+        "sumulas": 0, "sumulas_chunks": 0,
+        "enunciados": 0, "enunciados_chunks": 0,
+        "orientacoes": 0, "orientacoes_chunks": 0,
+    }
+
+    for _, row in df.iterrows():
+        tipo = row["tipo"]
+        if tipo in mapping:
+            key = mapping[tipo]
+            stats[key] = int(row["normas"])
+            stats[key + "_chunks"] = int(row["chunks"])
+
     return stats
 
 def agrupar_categorias(df_tipos):
