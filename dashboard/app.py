@@ -4,13 +4,13 @@ Streamlit app com chat interativo e linha do tempo normativa.
 """
 
 import sys
+import html
 from pathlib import Path
 
 # Garantir que o root do projeto está no path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
-import html
 import sqlite3
 import pandas as pd
 from datetime import datetime
@@ -496,10 +496,17 @@ elif pagina == "📜 Linha do Tempo":
             status_txt = "Vigente" if pd.isna(row["vigencia_fim"]) else f"Revogada em {row['vigencia_fim']}"
             tamanho_kb = row["tamanho_texto"] / 1024 if row["tamanho_texto"] else 0
 
+
+            tipo_escaped = html.escape(str(row['tipo']))
+            num_escaped = html.escape(str(row['numero']))
+            ano_escaped = html.escape(str(row['ano']))
+            vigencia_escaped = html.escape(str(row['vigencia_inicio']))
+            status_escaped = html.escape(str(status_txt))
+
             st.markdown(f"""
             <div class="timeline-item">
-                <strong>{vigente} {row['tipo']} {row['numero']}/{row['ano']}</strong>
-                <br><small>📅 Publicação: {row['vigencia_inicio']} | {status_txt} | 📄 {tamanho_kb:.1f} KB</small>
+                <strong>{vigente} {tipo_escaped} {num_escaped}/{ano_escaped}</strong>
+                <br><small>📅 Publicação: {vigencia_escaped} | {status_escaped} | 📄 {tamanho_kb:.1f} KB</small>
             </div>
             """, unsafe_allow_html=True)
 
