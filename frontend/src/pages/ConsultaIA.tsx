@@ -1,8 +1,20 @@
 import { useState } from 'react';
-import { Send, Scale, User, Bot } from 'lucide-react';
+import { Send, Scale, User, Bot, Loader2 } from 'lucide-react';
 
 const ConsultaIA = () => {
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      setInput('');
+    }, 1500);
+  };
+
 
   return (
     <div className="flex flex-col h-full bg-slate-50 animate-in fade-in duration-500">
@@ -54,11 +66,12 @@ const ConsultaIA = () => {
 
       {/* Input Area */}
       <div className="p-6 bg-white border-t border-slate-200 shadow-[0_-4px_20px_-15px_rgba(0,0,0,0.1)]">
-        <form onSubmit={(e) => { e.preventDefault();   }} className="max-w-4xl mx-auto relative flex items-center">
+        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto relative flex items-center">
           <input aria-label="Digite sua pergunta sobre legislação tributária..."
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            disabled={isLoading}
             placeholder="Digite sua pergunta sobre legislação tributária..."
             className="w-full pl-6 pr-16 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-slate-700 shadow-inner"
           />
@@ -66,10 +79,14 @@ const ConsultaIA = () => {
             type="submit"
             aria-label="Enviar pergunta"
             title={!input.trim() ? "Digite uma pergunta para enviar" : "Enviar pergunta"}
-            disabled={!input.trim()}
-            className="absolute right-3 p-2.5 bg-[#0f3460] hover:bg-[#16213e] text-white rounded-xl transition-colors shadow-md group disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!input.trim() || isLoading}
+            className="absolute right-3 p-2.5 bg-[#0f3460] hover:bg-[#16213e] text-white rounded-xl transition-colors shadow-md group disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           >
-            <Send className="w-5 h-5 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            {isLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Send className="w-5 h-5 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            )}
           </button>
         </form>
         <p className="text-center text-xs text-slate-500 mt-3 font-medium">
