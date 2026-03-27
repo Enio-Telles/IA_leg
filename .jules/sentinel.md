@@ -11,3 +11,8 @@
 **Vulnerability:** The Streamlit dashboard rendered database content using `st.markdown(f"<div>{texto}</div>", unsafe_allow_html=True)` without any HTML escaping. If malicious HTML tags were stored in the `texto_integral` database column, they would be executed in the user's browser, leading to XSS.
 **Learning:** Functions that force HTML rendering (like `unsafe_allow_html=True` in Streamlit) bypass built-in framework protections. Database content, even if it seems safe, should be treated as untrusted user input when rendered as HTML to prevent stored XSS.
 **Prevention:** Always escape dynamic content before injecting it into raw HTML wrappers using standard library functions like `html.escape()` in Python.
+
+## 2026-03-24 - Fix Stored XSS in Streamlit Dashboard
+**Vulnerability:** Stored XSS vulnerability in `dashboard/app.py` timeline loop due to database values rendered unescaped within `st.markdown(..., unsafe_allow_html=True)`.
+**Learning:** In Streamlit, bypassing standard text rendering with `unsafe_allow_html=True` exposes the app to Stored XSS if dynamically fetched data (even internal DB entries) contains malicious HTML/JS. Streamlit doesn't auto-escape within this block.
+**Prevention:** Always use `html.escape(str(value))` to sanitize any variable or database field before injecting it into raw HTML strings for `st.markdown`.
