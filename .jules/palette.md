@@ -10,3 +10,6 @@
 ## 2024-05-20 - Adding Visual Feedback to Asynchronous Form Submissions
 **Learning:** Users lack confidence when interacting with AI chat interfaces if there is no immediate visual feedback that their input is being processed. It's critical to disable inputs to prevent duplicate submissions and show a clear loading indicator (like a spinner) in the submit button. In addition, interactive elements using Tailwind CSS inside forms need explicit `focus-visible` styles to ensure proper keyboard accessibility.
 **Action:** Always provide explicit visual feedback (loading spinners, disabled states) during asynchronous form submissions and ensure `focus-visible` rings are configured on interactive buttons, especially when relying on `focus:outline-none`.
+## 2025-05-15 - Interactive Global Operations
+**Learning:** Found that long-running tasks in global elements (like sidebar buttons) often lack asynchronous loading states or visible focus. The user clicks, nothing visibly changes immediately, which is confusing, and native focus is hidden without replacement.
+**Action:** Consistently enforce explicit disabled states with spinners and explicit `focus-visible` styles with ring offsets for interactive UI elements in the sidebar.
