@@ -270,17 +270,18 @@ def modal_ler_texto(versao_id):
 @st.cache_data(ttl=60)
 def pesquisar_normas(termo):
     conn = get_db_connection()
+    termo_escaped = termo.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_')
     return pd.read_sql("""
         SELECT n.id, n.tipo, n.numero, n.ano,
                COUNT(d.id) as total_dispositivos
         FROM normas n
         LEFT JOIN versoes_norma v ON n.id = v.norma_id AND v.vigencia_fim IS NULL
         LEFT JOIN dispositivos d ON v.id = d.versao_id
-        WHERE n.tipo LIKE ? OR n.numero LIKE ? OR CAST(n.ano AS TEXT) LIKE ?
+        WHERE n.tipo LIKE ? ESCAPE '\\' OR n.numero LIKE ? ESCAPE '\\' OR CAST(n.ano AS TEXT) LIKE ? ESCAPE '\\'
         GROUP BY n.id
         ORDER BY n.ano DESC, n.tipo
         LIMIT 50
-    """, conn, params=[f"%{termo}%", f"%{termo}%", f"%{termo}%"])
+    """, conn, params=[f"%{termo_escaped}%", f"%{termo_escaped}%", f"%{termo_escaped}%"])
 
 
 # ─────────────────────────────────────────────────────────
