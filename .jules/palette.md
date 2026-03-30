@@ -10,3 +10,6 @@
 ## 2024-05-20 - Adding Visual Feedback to Asynchronous Form Submissions
 **Learning:** Users lack confidence when interacting with AI chat interfaces if there is no immediate visual feedback that their input is being processed. It's critical to disable inputs to prevent duplicate submissions and show a clear loading indicator (like a spinner) in the submit button. In addition, interactive elements using Tailwind CSS inside forms need explicit `focus-visible` styles to ensure proper keyboard accessibility.
 **Action:** Always provide explicit visual feedback (loading spinners, disabled states) during asynchronous form submissions and ensure `focus-visible` rings are configured on interactive buttons, especially when relying on `focus:outline-none`.
+## 2024-05-24 - Accessibility Anti-Pattern: Overriding Visible Text with aria-label
+**Learning:** Adding an `aria-label` to an interactive element (like a button) that already contains sufficient visible descriptive text is an accessibility anti-pattern, as it completely overrides the visible text for screen readers.
+**Action:** Instead of `aria-label`, use a visually hidden element (`<span className="sr-only">`) to provide context and hide generic visible text using `aria-hidden="true"`.
