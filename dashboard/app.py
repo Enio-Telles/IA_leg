@@ -271,15 +271,20 @@ def modal_ler_texto(versao_id):
 def pesquisar_normas(termo):
     conn = get_db_connection()
     return pd.read_sql("""
-        SELECT n.id, n.tipo, n.numero, n.ano,
+        WITH matched_normas AS (
+            SELECT id, tipo, numero, ano
+            FROM normas
+            WHERE tipo LIKE ? OR numero LIKE ? OR CAST(ano AS TEXT) LIKE ?
+            ORDER BY ano DESC, tipo
+            LIMIT 50
+        )
+        SELECT m.id, m.tipo, m.numero, m.ano,
                COUNT(d.id) as total_dispositivos
-        FROM normas n
-        LEFT JOIN versoes_norma v ON n.id = v.norma_id AND v.vigencia_fim IS NULL
+        FROM matched_normas m
+        LEFT JOIN versoes_norma v ON m.id = v.norma_id AND v.vigencia_fim IS NULL
         LEFT JOIN dispositivos d ON v.id = d.versao_id
-        WHERE n.tipo LIKE ? OR n.numero LIKE ? OR CAST(n.ano AS TEXT) LIKE ?
-        GROUP BY n.id
-        ORDER BY n.ano DESC, n.tipo
-        LIMIT 50
+        GROUP BY m.id, m.tipo, m.numero, m.ano
+        ORDER BY m.ano DESC, m.tipo
     """, conn, params=[f"%{termo}%", f"%{termo}%", f"%{termo}%"])
 
 
