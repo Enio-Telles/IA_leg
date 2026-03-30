@@ -16,3 +16,7 @@
 **Vulnerability:** Stored XSS vulnerability in `dashboard/app.py` timeline loop due to database values rendered unescaped within `st.markdown(..., unsafe_allow_html=True)`.
 **Learning:** In Streamlit, bypassing standard text rendering with `unsafe_allow_html=True` exposes the app to Stored XSS if dynamically fetched data (even internal DB entries) contains malicious HTML/JS. Streamlit doesn't auto-escape within this block.
 **Prevention:** Always use `html.escape(str(value))` to sanitize any variable or database field before injecting it into raw HTML strings for `st.markdown`.
+## 2026-03-30 - Fix SQL LIKE wildcard injection
+**Vulnerability:** Unsanitized user inputs sent to SQLite `LIKE` clauses without an `ESCAPE` mechanism allow SQL LIKE wildcard injection.
+**Learning:** Missing escaping of `%`, `_` and `\` in LIKE clauses bypasses intended search logic and introduces DoS vectors by performing full table scans.
+**Prevention:** Always escape wildcards and use the ESCAPE clause when dynamically constructing LIKE query parameters.
