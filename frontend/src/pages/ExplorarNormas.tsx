@@ -109,8 +109,10 @@ const ExplorarNormas = () => {
                           </div>
                         </div>
                         <button className="flex-shrink-0 px-5 py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold rounded-lg border border-blue-200 transition-colors flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                          aria-label={`Ler texto da versão de ${version.date} de ${result.type} ${result.number}`}>
-                          <BookOpen className="w-4 h-4" /> Ler Texto
+                          >
+                          <BookOpen className="w-4 h-4" />
+                          <span className="sr-only">{`Ler texto da versão de ${version.date} de ${result.type} ${result.number}`}</span>
+                          <span aria-hidden="true">Ler Texto</span>
                         </button>
                       </div>
                     ))}

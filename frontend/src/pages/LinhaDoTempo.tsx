@@ -89,8 +89,9 @@ const LinhaDoTempo = () => {
               </div>
 
               <button className="px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 text-sm font-semibold rounded-lg border border-slate-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                aria-label={`Ver detalhes sobre ${item.type}`}>
-                Detalhes
+                >
+                <span className="sr-only">{`Ver detalhes sobre ${item.type}`}</span>
+                <span aria-hidden="true">Detalhes</span>
               </button>
             </div>
           </div>
