@@ -16,3 +16,8 @@
 **Vulnerability:** Stored XSS vulnerability in `dashboard/app.py` timeline loop due to database values rendered unescaped within `st.markdown(..., unsafe_allow_html=True)`.
 **Learning:** In Streamlit, bypassing standard text rendering with `unsafe_allow_html=True` exposes the app to Stored XSS if dynamically fetched data (even internal DB entries) contains malicious HTML/JS. Streamlit doesn't auto-escape within this block.
 **Prevention:** Always use `html.escape(str(value))` to sanitize any variable or database field before injecting it into raw HTML strings for `st.markdown`.
+
+## 2026-03-31 - Fix SQL LIKE Wildcard Injection in Streamlit Dashboard
+**Vulnerability:** SQL LIKE wildcard injection in `pesquisar_normas` inside `dashboard/app.py`. User input was passed directly into `LIKE` clauses without escaping `%` or `_`.
+**Learning:** Even when using parameterized queries (which prevent standard SQL injection), unescaped user input inside a `LIKE` pattern allows an attacker to use wildcards to bypass search logic, cause Denial of Service (by matching too many records), or perform data enumeration.
+**Prevention:** Always escape wildcard characters (`\`, `%`, and `_`) in user-provided search terms and append the `ESCAPE '\'` clause to the corresponding `LIKE` operators in the SQL query.
