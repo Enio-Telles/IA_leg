@@ -5,3 +5,7 @@
 ## 2024-05-24 - Remover Monkey Patch Arch (Aprofundamento)
 **Learning:** Testes antigos que assertavam strings hardcoded ("Art. 1º § 1º Inciso I") quebravam quando os parsers mudavam de comportamento. Além disso, monkey-patches globais nos arquivos `.pyc` permanecem no cache do pytest mesmo após deletar os arquivos originais se os mesmos já foram carregados antes.
 **Action:** Na remoção do monkey patch de `sitecustomize.py`, criei o factory pattern (`ia_leg.app.factory`) e usei ele DIRETAMENTE nos arquivos consumidores (`dashboard/app.py` e `etl/versionamento_pipeline.py`). Os testes frágeis de parser foram melhorados para serem resilientes às variações estruturais de parsing usando flexibilidade na igualdade da string.
+## 2024-05-24 - Remove unused carregar_modelo_rag function
+
+**Learning:** Removed an unused function from `dashboard/app.py` that was polluting the codebase.
+**Action:** When working in `dashboard/app.py`, always ensure functions are used or delete them if they are dead code.
