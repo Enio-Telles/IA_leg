@@ -10,3 +10,7 @@
 ## 2024-05-20 - Adding Visual Feedback to Asynchronous Form Submissions
 **Learning:** Users lack confidence when interacting with AI chat interfaces if there is no immediate visual feedback that their input is being processed. It's critical to disable inputs to prevent duplicate submissions and show a clear loading indicator (like a spinner) in the submit button. In addition, interactive elements using Tailwind CSS inside forms need explicit `focus-visible` styles to ensure proper keyboard accessibility.
 **Action:** Always provide explicit visual feedback (loading spinners, disabled states) during asynchronous form submissions and ensure `focus-visible` rings are configured on interactive buttons, especially when relying on `focus:outline-none`.
+
+## 2026-03-31 - [Added accessible focus to RAG update button]
+**Learning:** Found an accessibility issue pattern where sidebar action buttons on dark backgrounds (`bg-[#0f3460]`) lack sufficient `focus-visible` offset styling, making keyboard navigation invisible.
+**Action:** When adding focus states on dark gradients, use `focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f3460]` to ensure the focus ring is visible against the dark background.
