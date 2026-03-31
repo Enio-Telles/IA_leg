@@ -10,3 +10,7 @@
 ## 2026-03-27 - Streamlit DataFrame Instantiation Overhead
 **Learning:** In Streamlit dashboards, multiple sequential `pd.read_sql` calls or loops to gather database statistics cause severe N+1 query latency, largely dominated by Pandas DataFrame instantiation overhead rather than just DB round-trips.
 **Action:** Always combine and batch database statistics into a single SQL query (using subselects or `GROUP BY` with an `IN` clause) and process the resulting single DataFrame to minimize latency.
+
+## 2024-05-27 - Streamlit N+1 Query in Search Results Loop
+**Learning:** In Streamlit dashboards, iterating over search results (`df_resultado.iterrows()`) and rendering an expander for each item that triggers a separate database query (e.g., `buscar_norma_detalhes(row["id"])`) causes severe N+1 latency. The sequential queries block rendering.
+**Action:** Extract all IDs from the search results, execute a single batched SQL query using an `IN` clause to fetch all details simultaneously, and filter the resulting DataFrame in memory during the loop iteration.

@@ -246,6 +246,23 @@ def carregar_timeline(filtro_tipo=None, limite=50):
     return pd.read_sql(query, conn, params=params)
 
 @st.cache_data(ttl=60)
+def buscar_norma_detalhes_em_lote(norma_ids):
+    if not norma_ids:
+        import pandas as pd
+        return pd.DataFrame()
+    conn = get_db_connection()
+    # ⚡ Bolt: Use IN clause to fetch details for all search results at once, avoiding N+1 query problem
+    placeholders = ",".join("?" * len(norma_ids))
+    versoes = pd.read_sql(f"""
+        SELECT id, norma_id, vigencia_inicio, vigencia_fim, hash_texto,
+               LENGTH(texto_integral) as tamanho
+        FROM versoes_norma
+        WHERE norma_id IN ({placeholders})
+        ORDER BY vigencia_inicio DESC
+    """, conn, params=norma_ids)
+    return versoes
+
+@st.cache_data(ttl=60)
 def buscar_norma_detalhes(norma_id):
     conn = get_db_connection()
     versoes = pd.read_sql("""
@@ -529,9 +546,12 @@ elif pagina == "🔍 Explorar Normas":
         else:
             st.success(f"{len(df_resultado)} norma(s) encontrada(s)")
 
+            norma_ids = df_resultado["id"].tolist()
+            todas_versoes = buscar_norma_detalhes_em_lote(norma_ids)
+
             for _, row in df_resultado.iterrows():
                 with st.expander(f"📋 {row['tipo']} {row['numero']}/{row['ano']} — {row['total_dispositivos']} dispositivos"):
-                    versoes = buscar_norma_detalhes(row["id"])
+                    versoes = todas_versoes[todas_versoes["norma_id"] == row["id"]]
                     if not versoes.empty:
                         st.markdown("**Histórico de Versões:**")
                         for _, v in versoes.iterrows():
