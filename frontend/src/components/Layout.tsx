@@ -91,7 +91,7 @@ const Layout = () => {
               </div>
             </div>
           </div>
-          <button className="w-full flex items-center justify-center space-x-2 bg-white/10 hover:bg-white/20 text-white py-2.5 rounded-lg transition-colors text-sm font-medium">
+          <button className="w-full flex items-center justify-center space-x-2 bg-white/10 hover:bg-white/20 text-white py-2.5 rounded-lg transition-colors text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f3460]">
             <RefreshCw className="w-4 h-4" />
             <span>Atualizar Base (RAG)</span>
           </button>
