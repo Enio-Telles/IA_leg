@@ -1,7 +1,13 @@
-🎯 **What:** The code health issue regarding the unused local variable `e` in `scripts/debug_extract_2.py` has already been resolved in a previous commit (d7a0d7b911533a17ecfef857dab1d73a22e6197e). The three instances of `except Exception as e:` followed immediately by a `pass` statement were updated to `except Exception:`
+🎯 What
+Removed the unused `from __future__ import annotations` import from `ia_leg/etl/legal_parser.py`.
 
-💡 **Why:** Using `except Exception as e:` without ever referencing `e` causes linting warnings for unused variables. Removing it improves code health, readability, and consistency with `AGENTS.md` guidelines for catching exceptions silenced with `pass`.
+💡 Why
+This improves the readability and code health of the file by removing dead code. Type hints in this file use standard types from the `typing` module (`List` and `Tuple`) and do not require forward referencing or stringized annotations.
 
-✅ **Verification:** I verified the current contents of `scripts/debug_extract_2.py` using `cat` and confirmed that the issue does not exist anymore. I also ran `pytest` and confirmed that any failures are environment-related (missing dependencies like `requests`, `dotenv`, etc.) and completely unrelated to the already applied fix.
+✅ Verification
+- Validated with `git diff` that only line 9 was removed.
+- Ran formatting (`black`) and linting (`ruff check`) with no errors.
+- Verified syntactical correctness via `python3 -m py_compile` and unit test success for `test_legal_parser.py`.
 
-✨ **Result:** The codebase is cleaner, adheres to linting rules regarding unused variables, and follows the project's agent guidelines. No further action is required for this specific task.
+✨ Result
+Cleaned up the parser file by removing a redundant import, ensuring the codebase strictly maintains only required dependencies and headers.

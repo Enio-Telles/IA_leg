@@ -6,8 +6,6 @@ Objetivo:
 - gerar chunks úteis para RAG sem depender apenas de split("Art.")
 """
 
-from __future__ import annotations
-
 import re
 from typing import List, Tuple
 
@@ -88,7 +86,9 @@ def _identificador_alinea(bloco: str) -> str:
     return f"Alínea {m.group(1)})" if m else linha[:80].strip()
 
 
-def _adicionar_chunk(chunks: List[Tuple[str, str]], identificador: str, texto: str) -> None:
+def _adicionar_chunk(
+    chunks: List[Tuple[str, str]], identificador: str, texto: str
+) -> None:
     texto = texto.strip()
     identificador = identificador.strip()
     if not texto or not identificador:
