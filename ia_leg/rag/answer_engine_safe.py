@@ -8,8 +8,6 @@ Diferenças em relação ao answer_engine padrão:
 - anexa fontes verificadas ao final da resposta
 """
 
-from __future__ import annotations
-
 import os
 import time
 from typing import Dict, List, Optional, Tuple
