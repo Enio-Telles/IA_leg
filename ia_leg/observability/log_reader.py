@@ -1,7 +1,5 @@
 """Leitura de métricas operacionais do IA_leg."""
 
-from __future__ import annotations
-
 import json
 import sqlite3
 from pathlib import Path
@@ -10,7 +8,6 @@ from typing import Any, Dict
 import pandas as pd
 
 from ia_leg.core.config.settings import DB_PATH
-
 
 DEFAULT_BENCHMARK_FILE = Path(__file__).resolve().parent / "benchmark_resultados.json"
 
@@ -35,7 +32,6 @@ def carregar_query_logs(limit: int = 500) -> pd.DataFrame:
         conn.close()
 
 
-
 def carregar_stats_query_logs() -> Dict[str, Any]:
     df = carregar_query_logs(limit=5000)
     if df.empty:
@@ -56,7 +52,6 @@ def carregar_stats_query_logs() -> Dict[str, Any]:
         "avg_search_ms": float(df["search_time_ms"].fillna(0).mean()),
         "avg_chunks": float(df["chunks_used"].fillna(0).mean()),
     }
-
 
 
 def carregar_benchmark(path: str | Path | None = None) -> Dict[str, Any]:
