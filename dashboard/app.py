@@ -32,7 +32,8 @@ st.set_page_config(
 # CSS CUSTOMIZADO
 # ─────────────────────────────────────────────────────────
 
-st.markdown("""
+st.markdown(
+    """
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -109,21 +110,27 @@ st.markdown("""
         border-bottom: 2px solid rgba(102, 126, 234, 0.2);
     }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # ─────────────────────────────────────────────────────────
 # FUNÇÕES AUXILIARES
 # ─────────────────────────────────────────────────────────
 
+
 @st.cache_resource
 def get_db_connection():
     return sqlite3.connect(DB_PATH, check_same_thread=False)
+
 
 @st.cache_resource
 def carregar_modelo_rag():
     """Pré-carrega o modelo de embedding para eliminar latência na primeira consulta."""
     from ia_leg.rag.embedding_service import carregar_modelo
+
     return carregar_modelo()
+
 
 @st.cache_data(ttl=60)
 def carregar_estatisticas():
@@ -144,20 +151,26 @@ def carregar_estatisticas():
         "versoes": int(df.iloc[0]["versoes"]),
     }
 
+
 @st.cache_data(ttl=60)
 def carregar_normas_por_tipo():
     conn = get_db_connection()
-    return pd.read_sql("""
+    return pd.read_sql(
+        """
         SELECT tipo, COUNT(*) as quantidade
         FROM normas
         GROUP BY tipo
         ORDER BY quantidade DESC
-    """, conn)
+    """,
+        conn,
+    )
+
 
 @st.cache_data(ttl=60)
 def carregar_detalhamento_rag():
     conn = get_db_connection()
-    return pd.read_sql("""
+    return pd.read_sql(
+        """
         SELECT n.tipo as "Tipo de Documento", 
                n.tema as "Tema/Assunto", 
                COUNT(e.id) as "Trechos (Vetores RAG)"
@@ -168,7 +181,10 @@ def carregar_detalhamento_rag():
         WHERE v.vigencia_fim IS NULL
         GROUP BY n.tipo, n.tema
         ORDER BY "Trechos (Vetores RAG)" DESC
-    """, conn)
+    """,
+        conn,
+    )
+
 
 @st.cache_data(ttl=60)
 def carregar_stats_jurisprudencia():
@@ -195,10 +211,14 @@ def carregar_stats_jurisprudencia():
     }
 
     stats = {
-        "camara_plena": 0, "camara_plena_chunks": 0,
-        "sumulas": 0, "sumulas_chunks": 0,
-        "enunciados": 0, "enunciados_chunks": 0,
-        "orientacoes": 0, "orientacoes_chunks": 0,
+        "camara_plena": 0,
+        "camara_plena_chunks": 0,
+        "sumulas": 0,
+        "sumulas_chunks": 0,
+        "enunciados": 0,
+        "enunciados_chunks": 0,
+        "orientacoes": 0,
+        "orientacoes_chunks": 0,
     }
 
     for _, row in df.iterrows():
@@ -210,15 +230,35 @@ def carregar_stats_jurisprudencia():
 
     return stats
 
+
 def agrupar_categorias(df_tipos):
     """Agrupa tipos de normas em categorias maiores para visualização."""
     categorias = {
         "Legislação": ["Decreto", "LO", "Lei Complementar", "RICMS/RO", "CTN", "RIPVA"],
         "Atos Normativos": ["Instrução Normativa", "Portaria", "Resolução"],
-        "Jurisprudência TATE": ["Jurisprudencia_TATE_Camara_Plena", "Sumula_TATE", "Jurisprudencia_TATE"],
-        "Manuais e Orientações": ["Guia_Pratico_EFD", "Manual_MOC", "Orientacao", "Metodologia"],
+        "Jurisprudência TATE": [
+            "Jurisprudencia_TATE_Camara_Plena",
+            "Sumula_TATE",
+            "Jurisprudencia_TATE",
+        ],
+        "Manuais e Orientações": [
+            "Guia_Pratico_EFD",
+            "Manual_MOC",
+            "Orientacao",
+            "Metodologia",
+        ],
         "Pareceres e Despachos": ["Parecer", "Despacho"],
-        "Outros": ["Jurisprudencia_STF", "RC", "AN", "IF", "PN", "AC", "RI", "SN", "OUTRAS"]
+        "Outros": [
+            "Jurisprudencia_STF",
+            "RC",
+            "AN",
+            "IF",
+            "PN",
+            "AC",
+            "RI",
+            "SN",
+            "OUTRAS",
+        ],
     }
     result = []
     for cat, tipos in categorias.items():
@@ -226,6 +266,7 @@ def agrupar_categorias(df_tipos):
         if total > 0:
             result.append({"Categoria": cat, "Quantidade": int(total)})
     return pd.DataFrame(result)
+
 
 @st.cache_data(ttl=60)
 def carregar_timeline(filtro_tipo=None, limite=50):
@@ -245,72 +286,104 @@ def carregar_timeline(filtro_tipo=None, limite=50):
     params.append(limite)
     return pd.read_sql(query, conn, params=params)
 
+
 @st.cache_data(ttl=60)
 def buscar_norma_detalhes_em_lote(norma_ids):
     if not norma_ids:
         import pandas as pd
+
         return pd.DataFrame()
     conn = get_db_connection()
     # ⚡ Bolt: Use IN clause to fetch details for all search results at once, avoiding N+1 query problem
     placeholders = ",".join("?" * len(norma_ids))
-    versoes = pd.read_sql(f"""
+    versoes = pd.read_sql(
+        f"""
         SELECT id, norma_id, vigencia_inicio, vigencia_fim, hash_texto,
                LENGTH(texto_integral) as tamanho
         FROM versoes_norma
         WHERE norma_id IN ({placeholders})
         ORDER BY vigencia_inicio DESC
-    """, conn, params=norma_ids)
+    """,
+        conn,
+        params=norma_ids,
+    )
     return versoes
+
 
 @st.cache_data(ttl=60)
 def buscar_norma_detalhes(norma_id):
     conn = get_db_connection()
-    versoes = pd.read_sql("""
+    versoes = pd.read_sql(
+        """
         SELECT id, vigencia_inicio, vigencia_fim, hash_texto,
                LENGTH(texto_integral) as tamanho
         FROM versoes_norma
         WHERE norma_id = ?
         ORDER BY vigencia_inicio DESC
-    """, conn, params=[norma_id])
+    """,
+        conn,
+        params=[norma_id],
+    )
     return versoes
+
 
 @st.dialog("Texto Integral da Norma", width="large")
 def modal_ler_texto(versao_id):
     conn = get_db_connection()
-    df = pd.read_sql("SELECT texto_integral FROM versoes_norma WHERE id = ?", conn, params=[versao_id])
+    df = pd.read_sql(
+        "SELECT texto_integral FROM versoes_norma WHERE id = ?",
+        conn,
+        params=[versao_id],
+    )
     if not df.empty:
-        texto = html.escape(str(df.iloc[0]['texto_integral']))
-        st.markdown(f"<div style='white-space: pre-wrap; font-family: monospace; font-size: 14px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;'>{texto}</div>", unsafe_allow_html=True)
+        texto = html.escape(str(df.iloc[0]["texto_integral"]))
+        st.markdown(
+            f"<div style='white-space: pre-wrap; font-family: monospace; font-size: 14px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;'>{texto}</div>",
+            unsafe_allow_html=True,
+        )
     else:
         st.error("Texto não encontrado.")
+
 
 @st.cache_data(ttl=60)
 def pesquisar_normas(termo):
     conn = get_db_connection()
-    termo_escaped = termo.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_')
-    return pd.read_sql("""
+    termo_escaped = termo.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return pd.read_sql(
+        """
+        WITH paginated_normas AS (
+            SELECT id, tipo, numero, ano
+            FROM normas
+            WHERE tipo LIKE ? ESCAPE '\\' OR numero LIKE ? ESCAPE '\\' OR CAST(ano AS TEXT) LIKE ? ESCAPE '\\'
+            ORDER BY ano DESC, tipo
+            LIMIT 50
+        )
         SELECT n.id, n.tipo, n.numero, n.ano,
                COUNT(d.id) as total_dispositivos
-        FROM normas n
+        FROM paginated_normas n
         LEFT JOIN versoes_norma v ON n.id = v.norma_id AND v.vigencia_fim IS NULL
         LEFT JOIN dispositivos d ON v.id = d.versao_id
-        WHERE n.tipo LIKE ? ESCAPE '\\' OR n.numero LIKE ? ESCAPE '\\' OR CAST(n.ano AS TEXT) LIKE ? ESCAPE '\\'
         GROUP BY n.id
         ORDER BY n.ano DESC, n.tipo
-        LIMIT 50
-    """, conn, params=[f"%{termo_escaped}%", f"%{termo_escaped}%", f"%{termo_escaped}%"])
+    """,
+        conn,
+        params=[f"%{termo_escaped}%", f"%{termo_escaped}%", f"%{termo_escaped}%"],
+    )
 
 
 # ─────────────────────────────────────────────────────────
 # HEADER
 # ─────────────────────────────────────────────────────────
 
-st.markdown("""
+st.markdown(
+    """
 <div class="main-header">
     <h1>⚖️ Revisor Fiscal Inteligente</h1>
     <p>Secretaria de Estado de Finanças de Rondônia — Sistema de Consulta à Legislação Tributária</p>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # ─────────────────────────────────────────────────────────
 # SIDEBAR
@@ -321,8 +394,13 @@ with st.sidebar:
 
     pagina = st.radio(
         "Navegação",
-        ["💬 Consulta IA", "📊 Painel Geral", "📜 Linha do Tempo", "🔍 Explorar Normas"],
-        label_visibility="collapsed"
+        [
+            "💬 Consulta IA",
+            "📊 Painel Geral",
+            "📜 Linha do Tempo",
+            "🔍 Explorar Normas",
+        ],
+        label_visibility="collapsed",
     )
 
     st.divider()
@@ -332,14 +410,22 @@ with st.sidebar:
     st.metric("Normas", f"{stats['normas']:,}")
     st.metric("Dispositivos", f"{stats['dispositivos']:,}")
     st.metric("Vetores RAG", f"{stats['embeddings']:,}")
-    pct = (stats['embeddings'] / stats['dispositivos'] * 100) if stats['dispositivos'] > 0 else 0
+    pct = (
+        (stats["embeddings"] / stats["dispositivos"] * 100)
+        if stats["dispositivos"] > 0
+        else 0
+    )
     st.progress(min(pct / 100, 1.0), text=f"Indexação: {pct:.1f}%")
 
     st.divider()
-    
-    if st.button("🔄 Atualizar Base (RAG)", help="Recarrega os vetores e metadados mais recentes do banco."):
+
+    if st.button(
+        "🔄 Atualizar Base (RAG)",
+        help="Recarrega os vetores e metadados mais recentes do banco.",
+    ):
         with st.spinner("Limpando cache e recarregando vetores..."):
             from ia_leg.rag.retriever import invalidar_cache
+
             invalidar_cache()
             st.cache_data.clear()
             st.cache_resource.clear()
@@ -355,7 +441,9 @@ with st.sidebar:
 if pagina == "💬 Consulta IA":
 
     st.markdown("### 💬 Consulta à Legislação com IA")
-    st.caption("Faça perguntas em linguagem natural sobre a legislação tributária de Rondônia.")
+    st.caption(
+        "Faça perguntas em linguagem natural sobre a legislação tributária de Rondônia."
+    )
 
     # Estado do chat
     if "messages" not in st.session_state:
@@ -363,7 +451,9 @@ if pagina == "💬 Consulta IA":
 
     # Exibir histórico
     for msg in st.session_state.messages:
-        with st.chat_message(msg["role"], avatar="⚖️" if msg["role"] == "assistant" else "👤"):
+        with st.chat_message(
+            msg["role"], avatar="⚖️" if msg["role"] == "assistant" else "👤"
+        ):
             st.markdown(msg["content"])
 
     # Input
@@ -376,6 +466,7 @@ if pagina == "💬 Consulta IA":
             with st.spinner("Buscando na legislação e consultando IA..."):
                 try:
                     from ia_leg.app.factory import get_answer_engine
+
                     engine = get_answer_engine()
                     resposta = engine(prompt, top_k=5, backend="ollama")
                 except Exception as e:
@@ -396,29 +487,41 @@ elif pagina == "📊 Painel Geral":
     # Cards de estatísticas
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.markdown(f"""
+        st.markdown(
+            f"""
         <div class="stat-card">
             <h3>{stats['normas']:,}</h3>
             <p>Normas Cadastradas</p>
-        </div>""", unsafe_allow_html=True)
+        </div>""",
+            unsafe_allow_html=True,
+        )
     with c2:
-        st.markdown(f"""
+        st.markdown(
+            f"""
         <div class="stat-card green">
             <h3>{stats['dispositivos']:,}</h3>
             <p>Dispositivos (Artigos)</p>
-        </div>""", unsafe_allow_html=True)
+        </div>""",
+            unsafe_allow_html=True,
+        )
     with c3:
-        st.markdown(f"""
+        st.markdown(
+            f"""
         <div class="stat-card orange">
             <h3>{stats['versoes']:,}</h3>
             <p>Versões Registradas</p>
-        </div>""", unsafe_allow_html=True)
+        </div>""",
+            unsafe_allow_html=True,
+        )
     with c4:
-        st.markdown(f"""
+        st.markdown(
+            f"""
         <div class="stat-card blue">
             <h3>{stats['embeddings']:,}</h3>
             <p>Vetores RAG Indexados</p>
-        </div>""", unsafe_allow_html=True)
+        </div>""",
+            unsafe_allow_html=True,
+        )
 
     st.markdown("---")
 
@@ -431,55 +534,75 @@ elif pagina == "📊 Painel Geral":
         if not df_tipos.empty:
             df_cat = agrupar_categorias(df_tipos)
             if not df_cat.empty:
-                st.bar_chart(df_cat.set_index("Categoria")["Quantidade"], color="#667eea")
+                st.bar_chart(
+                    df_cat.set_index("Categoria")["Quantidade"], color="#667eea"
+                )
 
     with col_table:
         st.markdown("#### Detalhamento por Tipo")
         if not df_tipos.empty:
-            st.dataframe(df_tipos, use_container_width=True, hide_index=True, height=300)
+            st.dataframe(
+                df_tipos, use_container_width=True, hide_index=True, height=300
+            )
 
     st.markdown("---")
 
     # Seção: Base Jurisprudencial TATE
     st.markdown("### ⚖️ Base Jurisprudencial — TATE/RO")
-    st.caption("Decisões da Câmara Plena, Súmulas e Enunciados do Tribunal Administrativo de Tributos Estaduais.")
+    st.caption(
+        "Decisões da Câmara Plena, Súmulas e Enunciados do Tribunal Administrativo de Tributos Estaduais."
+    )
 
     juris_stats = carregar_stats_jurisprudencia()
 
     j1, j2, j3, j4 = st.columns(4)
     with j1:
-        st.markdown(f"""
+        st.markdown(
+            f"""
         <div class="juris-card">
             <h3>{juris_stats['camara_plena']}</h3>
             <p>Decisões Câmara Plena</p>
             <p style="font-size:0.65rem; opacity:0.7;">{juris_stats['camara_plena_chunks']} trechos semânticos</p>
-        </div>""", unsafe_allow_html=True)
+        </div>""",
+            unsafe_allow_html=True,
+        )
     with j2:
-        st.markdown(f"""
+        st.markdown(
+            f"""
         <div class="juris-card sumula">
             <h3>{juris_stats['sumulas']}</h3>
             <p>Súmulas TATE</p>
             <p style="font-size:0.65rem; opacity:0.7;">{juris_stats['sumulas_chunks']} trechos semânticos</p>
-        </div>""", unsafe_allow_html=True)
+        </div>""",
+            unsafe_allow_html=True,
+        )
     with j3:
-        st.markdown(f"""
+        st.markdown(
+            f"""
         <div class="juris-card enunciado">
             <h3>{juris_stats['enunciados']}</h3>
             <p>Enunciados TATE</p>
             <p style="font-size:0.65rem; opacity:0.7;">{juris_stats['enunciados_chunks']} trechos semânticos</p>
-        </div>""", unsafe_allow_html=True)
+        </div>""",
+            unsafe_allow_html=True,
+        )
     with j4:
-        st.markdown(f"""
+        st.markdown(
+            f"""
         <div class="juris-card orientacao">
             <h3>{juris_stats['orientacoes']}</h3>
             <p>Orientações</p>
             <p style="font-size:0.65rem; opacity:0.7;">{juris_stats['orientacoes_chunks']} trechos semânticos</p>
-        </div>""", unsafe_allow_html=True)
+        </div>""",
+            unsafe_allow_html=True,
+        )
 
     st.markdown("---")
     st.markdown("### 🧠 Composição da Memória da IA (Base RAG)")
-    st.caption("Detalhamento explícito de todos os trechos semânticos (chunks) que a IA utiliza para gerar respostas contextuais.")
-    
+    st.caption(
+        "Detalhamento explícito de todos os trechos semânticos (chunks) que a IA utiliza para gerar respostas contextuais."
+    )
+
     df_rag = carregar_detalhamento_rag()
     if not df_rag.empty:
         st.dataframe(df_rag, use_container_width=True, hide_index=True)
@@ -499,7 +622,9 @@ elif pagina == "📜 Linha do Tempo":
     col_filtro, col_limite = st.columns([2, 1])
     with col_filtro:
         df_tipos = carregar_normas_por_tipo()
-        opcoes_tipo = ["Todos"] + df_tipos["tipo"].tolist() if not df_tipos.empty else ["Todos"]
+        opcoes_tipo = (
+            ["Todos"] + df_tipos["tipo"].tolist() if not df_tipos.empty else ["Todos"]
+        )
         filtro_tipo = st.selectbox("Filtrar por tipo", opcoes_tipo)
     with col_limite:
         limite = st.slider("Registros", 10, 200, 50)
@@ -511,22 +636,28 @@ elif pagina == "📜 Linha do Tempo":
     else:
         for _, row in df_timeline.iterrows():
             vigente = "🟢" if pd.isna(row["vigencia_fim"]) else "🔴"
-            status_txt = "Vigente" if pd.isna(row["vigencia_fim"]) else f"Revogada em {row['vigencia_fim']}"
+            status_txt = (
+                "Vigente"
+                if pd.isna(row["vigencia_fim"])
+                else f"Revogada em {row['vigencia_fim']}"
+            )
             tamanho_kb = row["tamanho_texto"] / 1024 if row["tamanho_texto"] else 0
 
-
-            tipo_escaped = html.escape(str(row['tipo']))
-            num_escaped = html.escape(str(row['numero']))
-            ano_escaped = html.escape(str(row['ano']))
-            vigencia_escaped = html.escape(str(row['vigencia_inicio']))
+            tipo_escaped = html.escape(str(row["tipo"]))
+            num_escaped = html.escape(str(row["numero"]))
+            ano_escaped = html.escape(str(row["ano"]))
+            vigencia_escaped = html.escape(str(row["vigencia_inicio"]))
             status_escaped = html.escape(str(status_txt))
 
-            st.markdown(f"""
+            st.markdown(
+                f"""
             <div class="timeline-item">
                 <strong>{vigente} {tipo_escaped} {num_escaped}/{ano_escaped}</strong>
                 <br><small>📅 Publicação: {vigencia_escaped} | {status_escaped} | 📄 {tamanho_kb:.1f} KB</small>
             </div>
-            """, unsafe_allow_html=True)
+            """,
+                unsafe_allow_html=True,
+            )
 
 
 # ─────────────────────────────────────────────────────────
@@ -537,7 +668,9 @@ elif pagina == "🔍 Explorar Normas":
 
     st.markdown("### 🔍 Explorar Normas")
 
-    termo = st.text_input("Pesquisar por tipo, número ou ano", placeholder="Ex: Decreto, 22721, 2024...")
+    termo = st.text_input(
+        "Pesquisar por tipo, número ou ano", placeholder="Ex: Decreto, 22721, 2024..."
+    )
 
     if termo:
         df_resultado = pesquisar_normas(termo)
@@ -550,13 +683,19 @@ elif pagina == "🔍 Explorar Normas":
             todas_versoes = buscar_norma_detalhes_em_lote(norma_ids)
 
             for _, row in df_resultado.iterrows():
-                with st.expander(f"📋 {row['tipo']} {row['numero']}/{row['ano']} — {row['total_dispositivos']} dispositivos"):
+                with st.expander(
+                    f"📋 {row['tipo']} {row['numero']}/{row['ano']} — {row['total_dispositivos']} dispositivos"
+                ):
                     versoes = todas_versoes[todas_versoes["norma_id"] == row["id"]]
                     if not versoes.empty:
                         st.markdown("**Histórico de Versões:**")
                         for _, v in versoes.iterrows():
-                            vigente = "🟢 Vigente" if pd.isna(v["vigencia_fim"]) else f"🔴 Encerrada em {v['vigencia_fim']}"
-                            
+                            vigente = (
+                                "🟢 Vigente"
+                                if pd.isna(v["vigencia_fim"])
+                                else f"🔴 Encerrada em {v['vigencia_fim']}"
+                            )
+
                             col_info, col_btn = st.columns([4, 1])
                             with col_info:
                                 st.markdown(
