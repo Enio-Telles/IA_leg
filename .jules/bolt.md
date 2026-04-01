@@ -14,3 +14,7 @@
 ## 2024-05-27 - Streamlit N+1 Query in Search Results Loop
 **Learning:** In Streamlit dashboards, iterating over search results (`df_resultado.iterrows()`) and rendering an expander for each item that triggers a separate database query (e.g., `buscar_norma_detalhes(row["id"])`) causes severe N+1 latency. The sequential queries block rendering.
 **Action:** Extract all IDs from the search results, execute a single batched SQL query using an `IN` clause to fetch all details simultaneously, and filter the resulting DataFrame in memory during the loop iteration.
+
+## 2026-03-27 - Deferred Join with CTE in Paginated SQLite Searches
+**Learning:** In SQLite paginated search queries that involve heavy LEFT JOINs across large tables (like `dispositivos` and `versoes_norma`), joining the tables *before* applying `WHERE`, `ORDER BY`, and `LIMIT` forces the engine to process combinations that are ultimately discarded.
+**Action:** Extract the initial filtering (`WHERE`), ordering (`ORDER BY`), and `LIMIT` on the root table (`normas`) into a Common Table Expression (CTE) to create a subset. Then perform the JOIN operations only on this subset, yielding substantial performance improvements (typically >1.5x) while reducing computational overhead.
