@@ -1,8 +1,18 @@
 
+import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { MessageSquare, LayoutDashboard, Clock, Search, RefreshCw, Scale } from 'lucide-react';
+import { MessageSquare, LayoutDashboard, Clock, Search, RefreshCw, Scale, Loader2 } from 'lucide-react';
 
 const Layout = () => {
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleUpdate = () => {
+    setIsUpdating(true);
+    setTimeout(() => {
+      setIsUpdating(false);
+    }, 2000);
+  };
+
   return (
     <div className="flex h-screen bg-gray-50 text-slate-800 font-sans">
       {/* Sidebar */}
@@ -91,9 +101,14 @@ const Layout = () => {
               </div>
             </div>
           </div>
-          <button className="w-full flex items-center justify-center space-x-2 bg-white/10 hover:bg-white/20 text-white py-2.5 rounded-lg transition-colors text-sm font-medium">
-            <RefreshCw className="w-4 h-4" />
-            <span>Atualizar Base (RAG)</span>
+          <button
+            onClick={handleUpdate}
+            disabled={isUpdating}
+            aria-live="polite"
+            className="w-full flex items-center justify-center space-x-2 bg-white/10 hover:bg-white/20 text-white py-2.5 rounded-lg transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f3460]"
+          >
+            {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+            <span>{isUpdating ? 'Atualizando...' : 'Atualizar Base (RAG)'}</span>
           </button>
         </div>
       </aside>
