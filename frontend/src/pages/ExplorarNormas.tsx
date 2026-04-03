@@ -1,9 +1,19 @@
 import { useState } from 'react';
-import { Search, ChevronDown, ChevronUp, BookOpen, Clock, AlertCircle } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, BookOpen, Clock, AlertCircle, Loader2 } from 'lucide-react';
 
 const ExplorarNormas = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [expanded, setExpanded] = useState<number | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchTerm.trim()) return;
+    setIsSearching(true);
+    setTimeout(() => {
+      setIsSearching(false);
+    }, 1500);
+  };
 
   const results = [
     { id: 1, type: 'Decreto', number: '22.721', year: '2018', devices: 156, versions: [
@@ -33,7 +43,7 @@ const ExplorarNormas = () => {
       </header>
 
       {/* Search Bar */}
-      <form onSubmit={(e) => e.preventDefault()} className="relative group">
+      <form onSubmit={handleSearch} className="relative group">
         <div className="absolute inset-y-0 left-0 flex items-center pl-5 pointer-events-none">
           <Search className="w-6 h-6 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
         </div>
@@ -41,11 +51,16 @@ const ExplorarNormas = () => {
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          disabled={isSearching}
           placeholder="Pesquisar por tipo, número ou ano"
-          className="w-full pl-14 pr-6 py-5 bg-white border-2 border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-lg shadow-sm font-medium text-slate-800 placeholder-slate-500"
+          className="w-full pl-14 pr-6 py-5 bg-white border-2 border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-lg shadow-sm font-medium text-slate-800 placeholder-slate-500 disabled:opacity-50 disabled:cursor-not-allowed"
         />
-        <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 px-6 py-2.5 bg-[#0f3460] hover:bg-[#16213e] text-white rounded-xl transition-colors font-semibold shadow-md focus-visible:ring-2 focus:outline-none focus-visible:ring-blue-500 focus-visible:ring-offset-2">
-          Pesquisar
+        <button type="submit"
+          disabled={!searchTerm.trim() || isSearching}
+          aria-live="polite"
+          className="absolute right-4 top-1/2 -translate-y-1/2 px-6 py-2.5 bg-[#0f3460] hover:bg-[#16213e] text-white rounded-xl transition-colors font-semibold shadow-md focus-visible:ring-2 focus:outline-none focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+          {isSearching ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+          {isSearching ? 'Buscando...' : 'Pesquisar'}
         </button>
       </form>
 
