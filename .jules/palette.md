@@ -14,3 +14,7 @@
 ## 2026-03-15 - Missing Feedback on Global Action Buttons
 **Learning:** Global action buttons (like "Atualizar Base") often lack immediate visual feedback and disabled states, leading to duplicate submissions and poor screen reader experience during async operations.
 **Action:** Always pair async button actions with a disabled state, a visual loading indicator (`animate-spin`), `aria-live="polite"` for screen readers, and clear focus states (`focus-visible`). Simulated async loading states are effective for demonstrating these UI patterns when backend APIs are pending.
+
+## 2024-05-21 - Visual Feedback for Search Forms
+**Learning:** Search forms without loading states leave users uncertain if their query is being processed, leading to multiple clicks.
+**Action:** Always provide explicit visual feedback (e.g., `Loader2`), disable inputs/buttons during async operations, and add `aria-live="polite"` for screen readers to announce the state change.
