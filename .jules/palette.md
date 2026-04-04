@@ -14,3 +14,7 @@
 ## 2026-03-15 - Missing Feedback on Global Action Buttons
 **Learning:** Global action buttons (like "Atualizar Base") often lack immediate visual feedback and disabled states, leading to duplicate submissions and poor screen reader experience during async operations.
 **Action:** Always pair async button actions with a disabled state, a visual loading indicator (`animate-spin`), `aria-live="polite"` for screen readers, and clear focus states (`focus-visible`). Simulated async loading states are effective for demonstrating these UI patterns when backend APIs are pending.
+
+## 2024-05-24 - Avoid overriding visible text with aria-label
+**Learning:** Adding an `aria-label` to an interactive element (like a button) that already contains sufficient visible descriptive text is an accessibility anti-pattern. It completely overrides the visible text for screen readers and breaks automatic translation tools because they skip attributes.
+**Action:** Use visually hidden text nodes (e.g., `<span className="sr-only">`) appended to the visible text instead of `aria-label` to provide extra context without overriding the visible text.
