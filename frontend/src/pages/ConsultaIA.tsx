@@ -77,11 +77,14 @@ const ConsultaIA = () => {
           />
           <button
             type="submit"
-            aria-label="Enviar pergunta"
             title={!input.trim() ? "Digite uma pergunta para enviar" : "Enviar pergunta"}
             disabled={!input.trim() || isLoading}
+            aria-live="polite"
             className="absolute right-3 p-2.5 bg-[#0f3460] hover:bg-[#16213e] text-white rounded-xl transition-colors shadow-md group disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           >
+            <span className="sr-only">
+              {isLoading ? "Processando pergunta..." : "Enviar pergunta"}
+            </span>
             {isLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (

@@ -37,7 +37,8 @@ const ExplorarNormas = () => {
         <div className="absolute inset-y-0 left-0 flex items-center pl-5 pointer-events-none">
           <Search className="w-6 h-6 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
         </div>
-        <input aria-label="Pesquisar por tipo, número ou ano"
+        <label htmlFor="search-input" className="sr-only">Pesquisar por tipo, número ou ano</label>
+        <input id="search-input"
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -108,9 +109,10 @@ const ExplorarNormas = () => {
                             <code className="bg-slate-100 px-2 py-0.5 rounded text-slate-600">{version.hash}</code>
                           </div>
                         </div>
-                        <button className="flex-shrink-0 px-5 py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold rounded-lg border border-blue-200 transition-colors flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                          aria-label={`Ler texto da versão de ${version.date} de ${result.type} ${result.number}`}>
-                          <BookOpen className="w-4 h-4" /> Ler Texto
+                        <button className="flex-shrink-0 px-5 py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold rounded-lg border border-blue-200 transition-colors flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
+                          <BookOpen aria-hidden="true" className="w-4 h-4" />
+                          Ler Texto
+                          <span className="sr-only">{` da versão de ${version.date} de ${result.type} ${result.number}`}</span>
                         </button>
                       </div>
                     ))}
