@@ -21,3 +21,7 @@
 ## 2025-05-24 - [Lazy Loading ML Dependencies]
 **Learning:** Importing heavy ML dependencies like `sentence_transformers` or `torch` at the top level of a module causes massive performance penalties during application startup, even if the code path using them isn't hit immediately.
 **Action:** Always utilize the lazy loading pattern for these libraries, importing them directly inside the initialization functions (e.g., `carregar_modelo()`) so main global imports remain fast.
+
+## 2024-05-28 - Pandas DataFrame Iteration Bottleneck
+**Learning:** In Python data applications, iterating over Pandas DataFrames using `iterrows()` yields a Series for each row and carries significant overhead, severely blocking thread execution and reducing UI responsiveness.
+**Action:** For optimal performance when iterating over Pandas DataFrames, always replace `iterrows()` loops with `itertuples()`, which returns fast namedtuples instead of Series objects.
