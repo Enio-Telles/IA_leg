@@ -17,11 +17,6 @@ from typing import List, Optional
 warnings.filterwarnings("ignore", message=".*CVE-2025-32434.*")
 warnings.filterwarnings("ignore", category=FutureWarning, module="torch")
 
-try:
-    from sentence_transformers import SentenceTransformer
-except ImportError:
-    SentenceTransformer = None
-
 from ia_leg.core.config.settings import DB_PATH, EMBEDDING_MODEL
 
 # Modelos Predefinidos
@@ -32,17 +27,24 @@ MODELO_PRECISE = "BAAI/bge-m3"
 _MODELO = None
 _MODELO_NOME_ATUAL = None
 
+
 def get_device(device_param: Optional[str] = None) -> str:
     """Retorna o device (cpu/cuda) explícito ou inferido."""
     if device_param:
         return device_param
     try:
         import torch
+
         return "cuda" if torch.cuda.is_available() else "cpu"
     except ImportError:
         return "cpu"
 
-def carregar_modelo(model_name: Optional[str] = None, device: Optional[str] = None, force_reload: bool = False):
+
+def carregar_modelo(
+    model_name: Optional[str] = None,
+    device: Optional[str] = None,
+    force_reload: bool = False,
+):
     """Carrega o modelo de embeddings (parametrizável)."""
     global _MODELO, _MODELO_NOME_ATUAL
 
@@ -50,7 +52,10 @@ def carregar_modelo(model_name: Optional[str] = None, device: Optional[str] = No
     target_model = model_name or EMBEDDING_MODEL
 
     if force_reload or _MODELO is None or _MODELO_NOME_ATUAL != target_model:
-        if SentenceTransformer is None:
+        try:
+            # ⚡ Bolt: Lazy load to avoid massive performance penalties during module import
+            from sentence_transformers import SentenceTransformer
+        except ImportError:
             raise ImportError(
                 "Instale 'sentence-transformers' para usar gerar_embeddings()"
             )
@@ -60,8 +65,11 @@ def carregar_modelo(model_name: Optional[str] = None, device: Optional[str] = No
 
         if target_device == "cuda":
             import torch
+
             try:
-                print(f"  GPU: {torch.cuda.get_device_name(0)} ({torch.cuda.get_device_properties(0).total_memory / 1024**3:.1f} GB VRAM)")
+                print(
+                    f"  GPU: {torch.cuda.get_device_name(0)} ({torch.cuda.get_device_properties(0).total_memory / 1024**3:.1f} GB VRAM)"
+                )
             except Exception:
                 pass
 
@@ -71,7 +79,12 @@ def carregar_modelo(model_name: Optional[str] = None, device: Optional[str] = No
     return _MODELO
 
 
-def gerar_embeddings(textos: List[str], model_name: Optional[str] = None, device: Optional[str] = None, batch_size: int = 32) -> List[np.ndarray]:
+def gerar_embeddings(
+    textos: List[str],
+    model_name: Optional[str] = None,
+    device: Optional[str] = None,
+    batch_size: int = 32,
+) -> List[np.ndarray]:
     """Gera vetores a partir de uma lista de textos."""
     if not textos:
         return []
@@ -80,15 +93,16 @@ def gerar_embeddings(textos: List[str], model_name: Optional[str] = None, device
     print(f"Gerando embeddings para {len(textos)} textos (batch_size={batch_size})...")
 
     vetores = modelo.encode(
-        textos,
-        batch_size=batch_size,
-        show_progress_bar=True,
-        normalize_embeddings=True
+        textos, batch_size=batch_size, show_progress_bar=True, normalize_embeddings=True
     )
     return vetores
 
 
-def indexar_dispositivos_sem_vetor(tamanho_lote: int = 16, model_name: Optional[str] = None, device: Optional[str] = None):
+def indexar_dispositivos_sem_vetor(
+    tamanho_lote: int = 16,
+    model_name: Optional[str] = None,
+    device: Optional[str] = None,
+):
     """
     Busca no banco de dados dispositivos que ainda não possuem embeddings,
     gera seus vetores e os persiste no SQLite.
@@ -117,7 +131,7 @@ def indexar_dispositivos_sem_vetor(tamanho_lote: int = 16, model_name: Optional[
     total = len(resultados)
     total_lotes = (total + tamanho_lote - 1) // tamanho_lote
     print(f"{'='*60}")
-    print(f"INDEXAÇÃO VETORIAL MASSIVA")
+    print("INDEXAÇÃO VETORIAL MASSIVA")
     print(f"Modelo: {target_model}")
     print(f"Dispositivos pendentes: {total}")
     print(f"Tamanho do lote: {tamanho_lote}")
@@ -137,7 +151,12 @@ def indexar_dispositivos_sem_vetor(tamanho_lote: int = 16, model_name: Optional[
         try:
             inicio_lote = time.time()
             # Usamos gerar_embeddings passando as configurações parametrizadas
-            vetores = gerar_embeddings(textos_lote, model_name=target_model, device=device, batch_size=tamanho_lote)
+            vetores = gerar_embeddings(
+                textos_lote,
+                model_name=target_model,
+                device=device,
+                batch_size=tamanho_lote,
+            )
             tempo_lote = time.time() - inicio_lote
 
             # Persistir
@@ -180,7 +199,7 @@ def indexar_dispositivos_sem_vetor(tamanho_lote: int = 16, model_name: Optional[
     conn.close()
     tempo_final = time.time() - inicio_geral
     print(f"\n{'='*60}")
-    print(f"VETORIZAÇÃO FINALIZADA")
+    print("VETORIZAÇÃO FINALIZADA")
     print(f"Processados: {processados}/{total}")
     print(f"Erros: {erros} lotes")
     print(f"Tempo total: {tempo_final/60:.1f} minutos")
