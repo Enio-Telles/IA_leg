@@ -470,7 +470,8 @@ if pagina == "💬 Consulta IA":
                     engine = get_answer_engine()
                     resposta = engine(prompt, top_k=5, backend="ollama")
                 except Exception as e:
-                    resposta = f"❌ Erro ao consultar: {e}"
+                    print(f"Erro interno na consulta IA: {e}")
+                    resposta = "❌ Ocorreu um erro interno ao processar sua consulta. Tente novamente mais tarde."
 
             st.markdown(resposta)
             st.session_state.messages.append({"role": "assistant", "content": resposta})

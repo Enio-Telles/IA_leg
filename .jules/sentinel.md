@@ -21,3 +21,8 @@
 **Vulnerability:** SQL LIKE wildcard injection in `pesquisar_normas` inside `dashboard/app.py`. User input was passed directly into `LIKE` clauses without escaping `%` or `_`.
 **Learning:** Even when using parameterized queries (which prevent standard SQL injection), unescaped user input inside a `LIKE` pattern allows an attacker to use wildcards to bypass search logic, cause Denial of Service (by matching too many records), or perform data enumeration.
 **Prevention:** Always escape wildcard characters (`\`, `%`, and `_`) in user-provided search terms and append the `ESCAPE '\'` clause to the corresponding `LIKE` operators in the SQL query.
+
+## 2026-04-05 - Fix Information Leakage in Streamlit Dashboard Error Responses
+**Vulnerability:** The Streamlit dashboard exposed raw exception details (such as `Exception as e`) directly to the user interface via `st.markdown(f"❌ Erro ao consultar: {e}")` when the AI engine failed. This could expose internal stack traces, API configurations, or underlying logical errors.
+**Learning:** Displaying raw exceptions directly to the user is a common source of information disclosure. It violates the "fail securely" principle because the error messages may contain sensitive system data that attackers can leverage.
+**Prevention:** To prevent information leakage in Streamlit or other user interfaces, never expose raw Python exception messages directly to the user. Instead, log the detailed exception internally for debugging and return a generic, safe error message to the frontend.
