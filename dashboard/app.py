@@ -682,29 +682,29 @@ elif pagina == "🔍 Explorar Normas":
             norma_ids = df_resultado["id"].tolist()
             todas_versoes = buscar_norma_detalhes_em_lote(norma_ids)
 
-            for _, row in df_resultado.iterrows():
+            for row in df_resultado.itertuples():
                 with st.expander(
-                    f"📋 {row['tipo']} {row['numero']}/{row['ano']} — {row['total_dispositivos']} dispositivos"
+                    f"📋 {row.tipo} {row.numero}/{row.ano} — {row.total_dispositivos} dispositivos"
                 ):
-                    versoes = todas_versoes[todas_versoes["norma_id"] == row["id"]]
+                    versoes = todas_versoes[todas_versoes["norma_id"] == row.id]
                     if not versoes.empty:
                         st.markdown("**Histórico de Versões:**")
-                        for _, v in versoes.iterrows():
+                        for v in versoes.itertuples():
                             vigente = (
                                 "🟢 Vigente"
-                                if pd.isna(v["vigencia_fim"])
-                                else f"🔴 Encerrada em {v['vigencia_fim']}"
+                                if pd.isna(v.vigencia_fim)
+                                else f"🔴 Encerrada em {v.vigencia_fim}"
                             )
 
                             col_info, col_btn = st.columns([4, 1])
                             with col_info:
                                 st.markdown(
-                                    f"- **{v['vigencia_inicio']}** → {vigente} "
-                                    f"({v['tamanho']/1024:.1f} KB | Hash: `{v['hash_texto'][:12]}...`)"
+                                    f"- **{v.vigencia_inicio}** → {vigente} "
+                                    f"({v.tamanho/1024:.1f} KB | Hash: `{v.hash_texto[:12]}...`)"
                                 )
                             with col_btn:
-                                if st.button("📖 Ler Texto", key=f"btn_ler_{v['id']}"):
-                                    modal_ler_texto(v["id"])
+                                if st.button("📖 Ler Texto", key=f"btn_ler_{v.id}"):
+                                    modal_ler_texto(v.id)
                     else:
                         st.info("Sem versões registradas.")
     else:

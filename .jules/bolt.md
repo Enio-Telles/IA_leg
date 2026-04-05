@@ -18,3 +18,7 @@
 ## 2026-03-27 - Deferred Join with CTE in Paginated SQLite Searches
 **Learning:** In SQLite paginated search queries that involve heavy LEFT JOINs across large tables (like `dispositivos` and `versoes_norma`), joining the tables *before* applying `WHERE`, `ORDER BY`, and `LIMIT` forces the engine to process combinations that are ultimately discarded.
 **Action:** Extract the initial filtering (`WHERE`), ordering (`ORDER BY`), and `LIMIT` on the root table (`normas`) into a Common Table Expression (CTE) to create a subset. Then perform the JOIN operations only on this subset, yielding substantial performance improvements (typically >1.5x) while reducing computational overhead.
+
+## 2024-05-24 - Replace iterrows with itertuples
+**Learning:** In pandas, iterating over rows using `iterrows()` is slow because it creates a Series object for each row.
+**Action:** Use `itertuples()` instead, which returns a namedtuple, resulting in much faster iteration, especially in nested loops.
