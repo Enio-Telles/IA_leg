@@ -5,3 +5,6 @@
 ## 2024-05-24 - Remover Monkey Patch Arch (Aprofundamento)
 **Learning:** Testes antigos que assertavam strings hardcoded ("Art. 1º § 1º Inciso I") quebravam quando os parsers mudavam de comportamento. Além disso, monkey-patches globais nos arquivos `.pyc` permanecem no cache do pytest mesmo após deletar os arquivos originais se os mesmos já foram carregados antes.
 **Action:** Na remoção do monkey patch de `sitecustomize.py`, criei o factory pattern (`ia_leg.app.factory`) e usei ele DIRETAMENTE nos arquivos consumidores (`dashboard/app.py` e `etl/versionamento_pipeline.py`). Os testes frágeis de parser foram melhorados para serem resilientes às variações estruturais de parsing usando flexibilidade na igualdade da string.
+## 2025-05-14 - Removendo imports não utilizados
+**Aprendizado:** Manter o código limpo removendo imports não utilizados (como `re` em `etl/html_to_text.py`) melhora a legibilidade e evita confusão sobre as dependências do módulo.
+**Ação:** Sempre verificar se novos imports são realmente necessários e usar linters como `ruff` para identificar código morto antes de submeter PRs.
