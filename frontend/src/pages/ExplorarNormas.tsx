@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, ChevronDown, ChevronUp, BookOpen, Clock, AlertCircle } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, BookOpen, Clock, AlertCircle, X } from 'lucide-react';
 
 const ExplorarNormas = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -43,16 +43,28 @@ const ExplorarNormas = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Pesquisar por tipo, número ou ano"
-          className="w-full pl-14 pr-6 py-5 bg-white border-2 border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-lg shadow-sm font-medium text-slate-800 placeholder-slate-500"
+          className="w-full pl-14 pr-[150px] py-5 bg-white border-2 border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-lg shadow-sm font-medium text-slate-800 placeholder-slate-500"
         />
-        <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 px-6 py-2.5 bg-[#0f3460] hover:bg-[#16213e] text-white rounded-xl transition-colors font-semibold shadow-md focus-visible:ring-2 focus:outline-none focus-visible:ring-blue-500 focus-visible:ring-offset-2">
-          Pesquisar
-        </button>
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={() => setSearchTerm('')}
+              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              aria-label="Limpar pesquisa"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
+          <button type="submit" className="px-6 py-2.5 bg-[#0f3460] hover:bg-[#16213e] text-white rounded-xl transition-colors font-semibold shadow-md focus-visible:ring-2 focus:outline-none focus-visible:ring-blue-500 focus-visible:ring-offset-2">
+            Pesquisar
+          </button>
+        </div>
       </form>
 
       {/* Results */}
       <div className="space-y-6">
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-5 py-3 rounded-xl flex items-center gap-3 font-semibold shadow-sm">
+        <div role="status" aria-live="polite" className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-5 py-3 rounded-xl flex items-center gap-3 font-semibold shadow-sm">
            <AlertCircle className="w-5 h-5 text-emerald-600" />
            {results.length} norma(s) encontrada(s)
         </div>
