@@ -19,6 +19,8 @@ const ExplorarNormas = () => {
     ]}
   ];
 
+  const filteredResults = results.filter(r => `${r.type} ${r.number} ${r.year}`.toLowerCase().includes(searchTerm.toLowerCase()));
+
   const toggleExpand = (id: number) => {
     if (expanded === id) setExpanded(null);
     else setExpanded(id);
@@ -66,11 +68,27 @@ const ExplorarNormas = () => {
       <div className="space-y-6">
         <div role="status" aria-live="polite" className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-5 py-3 rounded-xl flex items-center gap-3 font-semibold shadow-sm">
            <AlertCircle className="w-5 h-5 text-emerald-600" />
-           {results.length} norma(s) encontrada(s)
+           {filteredResults.length} norma(s) encontrada(s)
         </div>
 
         <div className="space-y-4">
-          {results.map((result) => (
+          {filteredResults.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-sm flex flex-col items-center justify-center">
+              <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100">
+                <Search className="w-8 h-8 text-slate-400" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-800">Nenhuma norma encontrada</h3>
+              <p className="text-slate-500 mt-2 max-w-sm">
+                Não encontramos resultados para "<span className="font-semibold text-slate-700">{searchTerm}</span>". Tente ajustar sua pesquisa.
+              </p>
+              <button
+                onClick={() => setSearchTerm('')}
+                className="mt-6 px-5 py-2.5 bg-blue-50 text-blue-700 font-semibold rounded-xl hover:bg-blue-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+              >
+                Limpar pesquisa
+              </button>
+            </div>
+          ) : filteredResults.map((result) => (
             <div key={result.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-300">
               {/* Accordion Header */}
               <button
