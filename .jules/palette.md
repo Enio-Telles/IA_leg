@@ -18,3 +18,6 @@
 ## 2024-05-24 - Avoid overriding visible text with aria-label
 **Learning:** Adding an `aria-label` to an interactive element (like a button) that already contains sufficient visible descriptive text is an accessibility anti-pattern. It completely overrides the visible text for screen readers and breaks automatic translation tools because they skip attributes.
 **Action:** Use visually hidden text nodes (e.g., `<span className="sr-only">`) appended to the visible text instead of `aria-label` to provide extra context without overriding the visible text.
+## 2026-03-24 - Three-State Async Feedback Pattern
+**Learning:** Adding a third "success" state to async buttons provides clear closure for users. Binary loading states leave users uncertain if the action succeeded or just timed out.
+**Action:** Default to three-state feedback (idle -> loading -> success -> idle) for critical non-navigating actions like refreshing data or saving forms.

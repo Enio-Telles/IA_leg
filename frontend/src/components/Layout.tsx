@@ -1,15 +1,19 @@
 
 import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { MessageSquare, LayoutDashboard, Clock, Search, RefreshCw, Scale, Loader2 } from 'lucide-react';
+import { MessageSquare, LayoutDashboard, Clock, Search, RefreshCw, Scale, Loader2, Check } from 'lucide-react';
 
 const Layout = () => {
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateStatus, setUpdateStatus] = useState<'idle' | 'updating' | 'success'>('idle');
 
   const handleUpdate = () => {
-    setIsUpdating(true);
+    if (updateStatus !== 'idle') return;
+    setUpdateStatus('updating');
     setTimeout(() => {
-      setIsUpdating(false);
+      setUpdateStatus('success');
+      setTimeout(() => {
+        setUpdateStatus('idle');
+      }, 2500);
     }, 2000);
   };
 
@@ -103,12 +107,24 @@ const Layout = () => {
           </div>
           <button
             onClick={handleUpdate}
-            disabled={isUpdating}
+            disabled={updateStatus !== 'idle'}
             aria-live="polite"
-            className="w-full flex items-center justify-center space-x-2 bg-white/10 hover:bg-white/20 text-white py-2.5 rounded-lg transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f3460]"
+            className={`w-full flex items-center justify-center space-x-2 py-2.5 rounded-lg transition-colors text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f3460] ${
+              updateStatus === 'success'
+                ? 'bg-emerald-500/20 text-emerald-400 disabled:opacity-100 disabled:cursor-default'
+                : 'bg-white/10 hover:bg-white/20 text-white disabled:opacity-50 disabled:cursor-not-allowed'
+            }`}
           >
-            {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-            <span>{isUpdating ? 'Atualizando...' : 'Atualizar Base (RAG)'}</span>
+            {updateStatus === 'updating' ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : updateStatus === 'success' ? (
+              <Check className="w-4 h-4" />
+            ) : (
+              <RefreshCw className="w-4 h-4" />
+            )}
+            <span>
+              {updateStatus === 'updating' ? 'Atualizando...' : updateStatus === 'success' ? 'Base Atualizada!' : 'Atualizar Base (RAG)'}
+            </span>
           </button>
         </div>
       </aside>
