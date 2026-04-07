@@ -1,25 +1,30 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Search, ChevronDown, ChevronUp, BookOpen, Clock, AlertCircle, X } from 'lucide-react';
+
+// ⚡ Bolt: Moved static data outside component to prevent array recreation on every render
+const results = [
+  { id: 1, type: 'Decreto', number: '22.721', year: '2018', devices: 156, versions: [
+    { date: '22/03/2018', status: '🟢 Vigente', size: '4.2 MB', hash: 'SHA-256: a1b2...' },
+    { date: '10/01/2019', status: '🔴 Encerrada', size: '4.1 MB', hash: 'SHA-256: c3d4...' }
+  ]},
+  { id: 2, type: 'Lei', number: '68', year: '1992', devices: 342, versions: [
+    { date: '09/12/1992', status: '🟢 Vigente', size: '1.5 MB', hash: 'SHA-256: e5f6...' }
+  ]},
+  { id: 3, type: 'Instrução Normativa', number: '12', year: '2023', devices: 45, versions: [
+    { date: '15/05/2023', status: '🔴 Encerrada', size: '0.8 MB', hash: 'SHA-256: g7h8...' },
+    { date: '20/06/2023', status: '🟢 Vigente', size: '0.9 MB', hash: 'SHA-256: i9j0...' }
+  ]}
+];
 
 const ExplorarNormas = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [expanded, setExpanded] = useState<number | null>(null);
 
-  const results = [
-    { id: 1, type: 'Decreto', number: '22.721', year: '2018', devices: 156, versions: [
-      { date: '22/03/2018', status: '🟢 Vigente', size: '4.2 MB', hash: 'SHA-256: a1b2...' },
-      { date: '10/01/2019', status: '🔴 Encerrada', size: '4.1 MB', hash: 'SHA-256: c3d4...' }
-    ]},
-    { id: 2, type: 'Lei', number: '68', year: '1992', devices: 342, versions: [
-      { date: '09/12/1992', status: '🟢 Vigente', size: '1.5 MB', hash: 'SHA-256: e5f6...' }
-    ]},
-    { id: 3, type: 'Instrução Normativa', number: '12', year: '2023', devices: 45, versions: [
-      { date: '15/05/2023', status: '🔴 Encerrada', size: '0.8 MB', hash: 'SHA-256: g7h8...' },
-      { date: '20/06/2023', status: '🟢 Vigente', size: '0.9 MB', hash: 'SHA-256: i9j0...' }
-    ]}
-  ];
-
-  const filteredResults = results.filter(r => `${r.type} ${r.number} ${r.year}`.toLowerCase().includes(searchTerm.toLowerCase()));
+  // ⚡ Bolt: Memoize filtered results to prevent O(N) string operations when 'expanded' state changes
+  const filteredResults = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return results.filter(r => `${r.type} ${r.number} ${r.year}`.toLowerCase().includes(term));
+  }, [searchTerm]);
 
   const toggleExpand = (id: number) => {
     if (expanded === id) setExpanded(null);
