@@ -221,12 +221,12 @@ def carregar_stats_jurisprudencia():
         "orientacoes_chunks": 0,
     }
 
-    for _, row in df.iterrows():
-        tipo = row["tipo"]
+    for row in df.itertuples():
+        tipo = row.tipo
         if tipo in mapping:
             key = mapping[tipo]
-            stats[key] = int(row["normas"])
-            stats[key + "_chunks"] = int(row["chunks"])
+            stats[key] = int(row.normas)
+            stats[key + "_chunks"] = int(row.chunks)
 
     return stats
 
@@ -635,19 +635,19 @@ elif pagina == "📜 Linha do Tempo":
     if df_timeline.empty:
         st.info("Nenhum registro encontrado com os filtros selecionados.")
     else:
-        for _, row in df_timeline.iterrows():
-            vigente = "🟢" if pd.isna(row["vigencia_fim"]) else "🔴"
+        for row in df_timeline.itertuples():
+            vigente = "🟢" if pd.isna(row.vigencia_fim) else "🔴"
             status_txt = (
                 "Vigente"
-                if pd.isna(row["vigencia_fim"])
-                else f"Revogada em {row['vigencia_fim']}"
+                if pd.isna(row.vigencia_fim)
+                else f"Revogada em {row.vigencia_fim}"
             )
-            tamanho_kb = row["tamanho_texto"] / 1024 if row["tamanho_texto"] else 0
+            tamanho_kb = row.tamanho_texto / 1024 if row.tamanho_texto else 0
 
-            tipo_escaped = html.escape(str(row["tipo"]))
-            num_escaped = html.escape(str(row["numero"]))
-            ano_escaped = html.escape(str(row["ano"]))
-            vigencia_escaped = html.escape(str(row["vigencia_inicio"]))
+            tipo_escaped = html.escape(str(row.tipo))
+            num_escaped = html.escape(str(row.numero))
+            ano_escaped = html.escape(str(row.ano))
+            vigencia_escaped = html.escape(str(row.vigencia_inicio))
             status_escaped = html.escape(str(status_txt))
 
             st.markdown(
@@ -683,29 +683,29 @@ elif pagina == "🔍 Explorar Normas":
             norma_ids = df_resultado["id"].tolist()
             todas_versoes = buscar_norma_detalhes_em_lote(norma_ids)
 
-            for _, row in df_resultado.iterrows():
+            for row in df_resultado.itertuples():
                 with st.expander(
-                    f"📋 {row['tipo']} {row['numero']}/{row['ano']} — {row['total_dispositivos']} dispositivos"
+                    f"📋 {row.tipo} {row.numero}/{row.ano} — {row.total_dispositivos} dispositivos"
                 ):
-                    versoes = todas_versoes[todas_versoes["norma_id"] == row["id"]]
+                    versoes = todas_versoes[todas_versoes["norma_id"] == row.id]
                     if not versoes.empty:
                         st.markdown("**Histórico de Versões:**")
-                        for _, v in versoes.iterrows():
+                        for v in versoes.itertuples():
                             vigente = (
                                 "🟢 Vigente"
-                                if pd.isna(v["vigencia_fim"])
-                                else f"🔴 Encerrada em {v['vigencia_fim']}"
+                                if pd.isna(v.vigencia_fim)
+                                else f"🔴 Encerrada em {v.vigencia_fim}"
                             )
 
                             col_info, col_btn = st.columns([4, 1])
                             with col_info:
                                 st.markdown(
-                                    f"- **{v['vigencia_inicio']}** → {vigente} "
-                                    f"({v['tamanho']/1024:.1f} KB | Hash: `{v['hash_texto'][:12]}...`)"
+                                    f"- **{v.vigencia_inicio}** → {vigente} "
+                                    f"({v.tamanho/1024:.1f} KB | Hash: `{v.hash_texto[:12]}...`)"
                                 )
                             with col_btn:
-                                if st.button("📖 Ler Texto", key=f"btn_ler_{v['id']}"):
-                                    modal_ler_texto(v["id"])
+                                if st.button("📖 Ler Texto", key=f"btn_ler_{v.id}"):
+                                    modal_ler_texto(v.id)
                     else:
                         st.info("Sem versões registradas.")
     else:
