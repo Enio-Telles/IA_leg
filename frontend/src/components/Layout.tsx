@@ -19,6 +19,9 @@ const Layout = () => {
 
   return (
     <div className="flex h-screen bg-gray-50 text-slate-800 font-sans">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded-lg z-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-400 shadow-lg">
+        Pular para o conteúdo principal
+      </a>
       {/* Sidebar */}
       <aside className="w-72 bg-gradient-to-b from-[#16213e] to-[#0f3460] text-white flex flex-col shadow-xl">
         <div className="p-6">
@@ -34,7 +37,7 @@ const Layout = () => {
             <NavLink
               to="/consulta-ia"
               className={({ isActive }) =>
-                `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 ${
                   isActive ? 'bg-blue-600/30 border border-blue-500/50 text-white' : 'text-slate-300 hover:bg-white/5 hover:text-white'
                 }`
               }
@@ -45,7 +48,7 @@ const Layout = () => {
             <NavLink
               to="/painel"
               className={({ isActive }) =>
-                `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 ${
                   isActive ? 'bg-blue-600/30 border border-blue-500/50 text-white' : 'text-slate-300 hover:bg-white/5 hover:text-white'
                 }`
               }
@@ -56,7 +59,7 @@ const Layout = () => {
             <NavLink
               to="/linha-do-tempo"
               className={({ isActive }) =>
-                `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 ${
                   isActive ? 'bg-blue-600/30 border border-blue-500/50 text-white' : 'text-slate-300 hover:bg-white/5 hover:text-white'
                 }`
               }
@@ -67,7 +70,7 @@ const Layout = () => {
             <NavLink
               to="/explorar-normas"
               className={({ isActive }) =>
-                `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 ${
                   isActive ? 'bg-blue-600/30 border border-blue-500/50 text-white' : 'text-slate-300 hover:bg-white/5 hover:text-white'
                 }`
               }
@@ -130,7 +133,7 @@ const Layout = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
+      <main id="main-content" tabIndex={-1} className="flex-1 overflow-auto focus:outline-none">
         <Outlet />
       </main>
     </div>

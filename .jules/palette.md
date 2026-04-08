@@ -21,3 +21,6 @@
 ## 2026-03-24 - Three-State Async Feedback Pattern
 **Learning:** Adding a third "success" state to async buttons provides clear closure for users. Binary loading states leave users uncertain if the action succeeded or just timed out.
 **Action:** Default to three-state feedback (idle -> loading -> success -> idle) for critical non-navigating actions like refreshing data or saving forms.
+## 2024-04-08 - Skip link and dark mode focus states
+**Learning:** Browser default focus indicators are often invisible on dark gradients (like the sidebar). We must explicitly add focus-visible styles. Also, a 'Skip to main content' link is vital for keyboard users to bypass repeating sidebars.
+**Action:** Always test keyboard navigation on dark components and add explicit focus rings. Add a skip link anchored to a main content area with tabIndex={-1}.
