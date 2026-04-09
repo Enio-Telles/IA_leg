@@ -67,7 +67,8 @@ const ConsultaIA = () => {
       {/* Input Area */}
       <div className="p-6 bg-white border-t border-slate-200 shadow-[0_-4px_20px_-15px_rgba(0,0,0,0.1)]">
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto relative flex items-center">
-          <input aria-label="Digite sua pergunta sobre legislação tributária..."
+          <label htmlFor="consulta-input" className="sr-only">Digite sua pergunta sobre legislação tributária...</label>
+          <input id="consulta-input"
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
