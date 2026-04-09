@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { Filter, Calendar, FileType, HardDrive } from 'lucide-react';
 
+// ⚡ Bolt: Moved static data outside component to prevent array recreation on every render
+const events = [
+  { status: '🟢 Vigente', type: 'Decreto 22.721/2018', date: '22/03/2018', size: '4.2 MB', active: true },
+  { status: '🟢 Vigente', type: 'Lei Complementar 68/92', date: '09/12/1992', size: '1.5 MB', active: true },
+  { status: '🔴 Revogada', type: 'Decreto 18.123/2014', date: '15/05/2014', size: '2.1 MB', active: false },
+  { status: '🟢 Vigente', type: 'Código Tributário Estadual', date: '28/02/2024', size: '8.9 MB', active: true },
+];
+
 const LinhaDoTempo = () => {
   const [limit, setLimit] = useState(50);
   const [filterType, setFilterType] = useState('Todos');
-
-  const events = [
-    { status: '🟢 Vigente', type: 'Decreto 22.721/2018', date: '22/03/2018', size: '4.2 MB', active: true },
-    { status: '🟢 Vigente', type: 'Lei Complementar 68/92', date: '09/12/1992', size: '1.5 MB', active: true },
-    { status: '🔴 Revogada', type: 'Decreto 18.123/2014', date: '15/05/2014', size: '2.1 MB', active: false },
-    { status: '🟢 Vigente', type: 'Código Tributário Estadual', date: '28/02/2024', size: '8.9 MB', active: true },
-  ];
 
   return (
     <div className="p-8 max-w-5xl mx-auto min-h-full flex flex-col animate-in fade-in duration-500">
