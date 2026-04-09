@@ -58,9 +58,9 @@ const ExplorarNormas = () => {
               type="button"
               onClick={() => setSearchTerm('')}
               className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-              aria-label="Limpar pesquisa"
             >
-              <X className="w-5 h-5" />
+              <span className="sr-only">Limpar pesquisa</span>
+              <X aria-hidden="true" className="w-5 h-5" />
             </button>
           )}
           <button type="submit" className="px-6 py-2.5 bg-[#0f3460] hover:bg-[#16213e] text-white rounded-xl transition-colors font-semibold shadow-md focus-visible:ring-2 focus:outline-none focus-visible:ring-blue-500 focus-visible:ring-offset-2">
