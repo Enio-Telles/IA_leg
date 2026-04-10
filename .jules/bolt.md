@@ -24,3 +24,7 @@
 ## 2024-04-08 - Prefer itertuples over iterrows for DataFrame iteration
 **Learning:** Using `iterrows()` on Pandas DataFrames introduces significant overhead by yielding Series objects, scaling poorly for larger datasets.
 **Action:** Always prefer `itertuples()` when iterating over Pandas DataFrames in this codebase to reduce iteration overhead, accessing row elements via dot attribute syntax (e.g., `row.col_name`).
+
+## 2024-04-10 - Deferred Join for Dashboard Timeline
+**Learning:** The timeline query in the dashboard joins large text columns (`texto_integral`) before applying limits and pagination, leading to unnecessary memory operations and poor scaling.
+**Action:** Used the 'Deferred Join' pattern with CTEs to limit rows first, and only fetch `texto_integral` on the required subset.
