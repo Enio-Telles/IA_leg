@@ -272,11 +272,11 @@ def agrupar_categorias(df_tipos):
 def carregar_timeline(filtro_tipo=None, limite=50):
     conn = get_db_connection()
     query = """
-        SELECT n.tipo, n.numero, n.ano, v.vigencia_inicio, v.vigencia_fim,
-               LENGTH(v.texto_integral) as tamanho_texto
-        FROM versoes_norma v
-        JOIN normas n ON v.norma_id = n.id
-        WHERE v.vigencia_inicio IS NOT NULL
+        WITH paginated_timeline AS (
+            SELECT v.id as versao_id, n.tipo, n.numero, n.ano, v.vigencia_inicio, v.vigencia_fim
+            FROM versoes_norma v
+            JOIN normas n ON v.norma_id = n.id
+            WHERE v.vigencia_inicio IS NOT NULL
     """
     params = []
     if filtro_tipo and filtro_tipo != "Todos":
@@ -284,6 +284,16 @@ def carregar_timeline(filtro_tipo=None, limite=50):
         params.append(filtro_tipo)
     query += " ORDER BY v.vigencia_inicio DESC LIMIT ?"
     params.append(limite)
+
+    query += """
+        )
+        SELECT pt.tipo, pt.numero, pt.ano, pt.vigencia_inicio, pt.vigencia_fim,
+               LENGTH(v_full.texto_integral) as tamanho_texto
+        FROM paginated_timeline pt
+        JOIN versoes_norma v_full ON pt.versao_id = v_full.id
+        ORDER BY pt.vigencia_inicio DESC
+    """
+
     return pd.read_sql(query, conn, params=params)
 
 
