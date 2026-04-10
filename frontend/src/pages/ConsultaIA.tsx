@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Send, Scale, User, Bot, Loader2 } from 'lucide-react';
+import { Send, Scale, User, Bot, Loader2, Copy, Check } from 'lucide-react';
 
 const ConsultaIA = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,20 +46,33 @@ const ConsultaIA = () => {
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#16213e] to-[#0f3460] flex items-center justify-center shrink-0 shadow-md">
             <Scale className="w-5 h-5 text-blue-200" />
           </div>
-          <div className="bg-blue-50/50 p-6 rounded-2xl rounded-tl-none border border-blue-100 shadow-sm text-[15px] leading-relaxed text-slate-700">
-            <p className="mb-4">
-              De acordo com o Regulamento do ICMS de Rondônia (<strong className="text-blue-900">Decreto nº 22.721/2018</strong>), a alíquota padrão para operações internas com energia elétrica é de <strong>17%</strong>.
-            </p>
-            <p className="mb-4">
-              No entanto, existem regimes diferenciados para consumidores residenciais de baixa renda e benefícios específicos para determinados setores industriais.
-            </p>
-            <div className="bg-white p-4 rounded-xl border border-blue-100 shadow-sm mt-4">
-              <p className="text-sm font-semibold text-blue-900 flex items-center gap-2 mb-2">
-                <Bot className="w-4 h-4" /> Fonte Jurídica
+          <div className="relative group bg-blue-50/50 p-6 rounded-2xl rounded-tl-none border border-blue-100 shadow-sm text-[15px] leading-relaxed text-slate-700">
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText('De acordo com o Regulamento do ICMS de Rondônia (Decreto nº 22.721/2018), a alíquota padrão para operações internas com energia elétrica é de 17%.\n\nNo entanto, existem regimes diferenciados para consumidores residenciais de baixa renda e benefícios específicos para determinados setores industriais.\n\nFonte Jurídica: Recomendo consultar o Artigo 12 da referida norma para o detalhamento completo das exceções e requisitos aplicáveis aos regimes diferenciados.');
+                setIsCopied(true);
+                setTimeout(() => setIsCopied(false), 2000);
+              }}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-100/50 rounded-lg transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 bg-blue-50/80 backdrop-blur-sm"
+            >
+              <span className="sr-only">{isCopied ? "Resposta copiada" : "Copiar resposta"}</span>
+              {isCopied ? <Check aria-hidden="true" className="w-4 h-4 text-emerald-600" /> : <Copy aria-hidden="true" className="w-4 h-4" />}
+            </button>
+            <div className="pr-8">
+              <p className="mb-4">
+                De acordo com o Regulamento do ICMS de Rondônia (<strong className="text-blue-900">Decreto nº 22.721/2018</strong>), a alíquota padrão para operações internas com energia elétrica é de <strong>17%</strong>.
               </p>
-              <p className="text-sm text-slate-600">
-                Recomendo consultar o <strong>Artigo 12</strong> da referida norma para o detalhamento completo das exceções e requisitos aplicáveis aos regimes diferenciados.
+              <p className="mb-4">
+                No entanto, existem regimes diferenciados para consumidores residenciais de baixa renda e benefícios específicos para determinados setores industriais.
               </p>
+              <div className="bg-white p-4 rounded-xl border border-blue-100 shadow-sm mt-4">
+                <p className="text-sm font-semibold text-blue-900 flex items-center gap-2 mb-2">
+                  <Bot className="w-4 h-4" /> Fonte Jurídica
+                </p>
+                <p className="text-sm text-slate-600">
+                  Recomendo consultar o <strong>Artigo 12</strong> da referida norma para o detalhamento completo das exceções e requisitos aplicáveis aos regimes diferenciados.
+                </p>
+              </div>
             </div>
           </div>
         </div>
