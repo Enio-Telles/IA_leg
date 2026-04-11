@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Search, ChevronDown, ChevronUp, BookOpen, Clock, AlertCircle, X } from 'lucide-react';
 
 // ⚡ Bolt: Moved static data outside component to prevent array recreation on every render
@@ -19,12 +19,27 @@ const results = [
 const ExplorarNormas = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [expanded, setExpanded] = useState<number | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // ⚡ Bolt: Memoize filtered results to prevent O(N) string operations when 'expanded' state changes
   const filteredResults = useMemo(() => {
     const term = searchTerm.toLowerCase();
     return results.filter(r => `${r.type} ${r.number} ${r.year}`.toLowerCase().includes(term));
   }, [searchTerm]);
+
+
+  // 🎨 Palette: Adicionado atalho de teclado para foco rápido na pesquisa (Usando useRef)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignora se o usuário já estiver digitando em um input ou textarea
+      if (e.key === '/' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const toggleExpand = (id: number) => {
     if (expanded === id) setExpanded(null);
@@ -45,7 +60,7 @@ const ExplorarNormas = () => {
           <Search className="w-6 h-6 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
         </div>
         <label htmlFor="search-input" className="sr-only">Pesquisar por tipo, número ou ano</label>
-        <input id="search-input"
+        <input ref={searchInputRef} id="search-input"
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -53,11 +68,15 @@ const ExplorarNormas = () => {
           className="w-full pl-14 pr-[150px] py-5 bg-white border-2 border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-lg shadow-sm font-medium text-slate-800 placeholder-slate-500"
         />
         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-          {searchTerm && (
+          {!searchTerm ? (
+            <kbd className="hidden sm:inline-flex items-center justify-center h-6 w-6 text-slate-400 bg-slate-100 border border-slate-200 rounded font-sans text-xs font-semibold shadow-sm pointer-events-none mr-2" aria-hidden="true" title="Pressione '/' para focar na pesquisa">
+              /
+            </kbd>
+          ) : (
             <button
               type="button"
               onClick={() => setSearchTerm('')}
-              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 mr-2"
             >
               <span className="sr-only">Limpar pesquisa</span>
               <X aria-hidden="true" className="w-5 h-5" />
